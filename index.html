@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>See like a Robot: Robot-Centric Pointmaps for Vision-Language-Action Models</title>
-  <meta name="description" content="Robot-centric pointmaps give VLAs 3D geometry in the robot frame where actions are defined, while preserving the dense image grid expected by pretrained backbones.">
+  <meta name="description" content="Robot-centric pointmaps express per-pixel 3D geometry in the robot frame while preserving the dense image grid used by pretrained VLAs.">
   <!-- remove the line below to allow search-engine indexing -->
   <meta name="robots" content="noindex, nofollow">
   <!-- Open Graph (for link previews on Twitter/Slack etc.) -->
   <meta property="og:title" content="See like a Robot: Robot-Centric Pointmaps for VLA Models">
-  <meta property="og:description" content="Robot-centric pointmaps give VLAs 3D geometry in the robot frame where actions are defined.">
+  <meta property="og:description" content="Robot-centric pointmaps express per-pixel 3D geometry in the robot frame while preserving the dense image grid used by pretrained VLAs.">
   <meta property="og:image" content="static/images/fig1_teaser.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -253,6 +253,12 @@
       BibTeX
     </a>
   </div>
+
+  <p class="tagline" style="margin: 24px auto 0;">
+    We convert RGB-D observations into <b>robot-centric pointmaps</b>, where each pixel stores the
+    corresponding 3D scene point in the robot frame. Pointmaps provide robot-frame 3D geometry
+    while preserving the dense image grid used by pretrained VLAs.
+  </p>
 </div>
 
 <!-- =============================== TEASER (1-min overview video) =============================== -->
@@ -274,17 +280,16 @@
 <section class="container" id="setting">
   <h2>Cameras Move. Actions Don't.</h2>
   <p class="body-text">
-    <b>A VLA observes the scene in the camera frame, while its actions are defined in the robot
-    frame.</b> The policy itself has to bridge this gap, learning how what it sees maps to how it
-    should move. With a fixed camera this mismatch stays manageable. A single
-    observation-to-action mapping holds across the whole dataset, and the policy can simply
-    memorize it.
+    <b>A VLA observes the scene from the camera frame but predicts actions in the robot frame.</b>
+    When the camera viewpoint changes, the visual observation changes even though the required
+    robot action is defined in the same robot frame. The policy must therefore handle a different
+    observation-to-action relationship across viewpoints.
   </p>
 
   <p class="body-text">
-    But large-scale robot datasets aggregate demonstrations from many labs, each with its own
-    camera setup. Every new camera placement rewrites that mapping. <b>Instead of memorizing one
-    fixed mapping, the policy must generalize across viewpoints, which is much harder.</b>
+    With a fixed camera, this relationship remains consistent across the dataset.
+    <b>As training demonstrations are collected from increasingly diverse viewpoints, however,
+    learning this relationship becomes more difficult.</b>
   </p>
 
   <div class="evidence-row" style="max-width: 840px; margin-top: 26px;">
@@ -294,7 +299,7 @@
     <div>
       <div class="stat-line">
         <div class="stat-num bad">34.5% &rarr; 24.9%</div>
-        <div class="stat-desc">RGB-only success keeps falling as training-camera variation grows from none to high (RoboCasa H50).</div>
+        <div class="stat-desc">RGB-only success keeps falling as training-time viewpoint variation grows from none to high (RoboCasa H50).</div>
       </div>
     </div>
   </div>
@@ -308,25 +313,28 @@
   <h2>3D in the Robot Frame, Shaped like an RGB Image</h2>
 
   <p class="body-text">
-    We close this gap at the input. The observation we feed the policy should satisfy two
-    requirements at once:
+    We close this gap at the input. A <b>robot-centric pointmap</b> combines two properties:
   </p>
   <ul class="req-list">
-    <li><b>3D spatial information in the robot's own coordinate frame.</b> Manipulation depends on where things are relative to the robot, and actions are defined in the robot frame. An observation that already carries robot-frame 3D spares the policy from learning the camera-to-robot transform.</li>
-    <li><b>A form that plugs into a pretrained VLA.</b> VLAs expect a dense H&thinsp;&times;&thinsp;W grid of image tokens. Keeping that interface lets their pretrained vision towers be reused as-is.</li>
+    <li><b>Robot-frame geometry.</b> Each pixel stores a 3D coordinate in the frame where robot actions are defined.</li>
+    <li><b>Image-form structure.</b> The dense H&thinsp;&times;&thinsp;W grid is preserved, allowing the pointmap to use the image-based visual pathway of a pretrained VLA.</li>
   </ul>
-  <p class="body-text"><b>Which 3D input satisfies both?</b></p>
 
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
   </figure>
 
   <p class="body-text">
-    A robot-centric pointmap stores, at each pixel, the 3D coordinate of that pixel's scene point
-    in the robot frame. It is computed by a fixed change of coordinates, using the camera intrinsics
-    and a one-time hand-eye calibration, so there is nothing for the policy to learn. The same
-    physical point keeps the same value no matter where the camera is placed. We additionally
-    re-center it at the current end-effector position.
+    A robot-centric pointmap stores the 3D coordinate of each visible scene point at its
+    corresponding image pixel. Unlike a depth map, these coordinates are expressed in the robot
+    frame rather than the camera frame.
+  </p>
+  <p class="body-text">
+    We construct the pointmap from depth, camera intrinsics, and calibrated camera extrinsics.
+  </p>
+  <p class="body-text">
+    As an additional design choice, we further express the robot-frame geometry relative to the
+    current end-effector position.
   </p>
   <div class="row2" style="max-width: 920px; margin-left: auto; margin-right: auto;">
     <figure style="margin: 0;">
@@ -334,7 +342,7 @@
     </figure>
     <figure style="margin: 0;">
       <img src="static/images/fig10_fusion.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 420px;">
-      <figcaption>A second SigLIP tower, initialized from the RGB encoder, encodes the pointmap. Its tokens are added element-wise to the RGB tokens, so no point-cloud encoder or extra token sequence is needed.</figcaption>
+      <figcaption>Because RGB and pointmap share the same pixel grid, their spatially corresponding tokens can be fused directly. We encode the pointmap with a second image encoder initialized from the VLA's RGB encoder and add the pointmap tokens element-wise to the corresponding RGB tokens. This introduces robot-frame 3D geometry into the existing visual pathway without a point-cloud encoder or an additional token sequence.</figcaption>
     </figure>
   </div>
 </section>
@@ -343,11 +351,13 @@
 
 <!-- =============================== PAYOFF (mirrors the intro study) =============================== -->
 <section class="container" id="payoff">
-  <h2>With Pointmaps, the Curve Stays Flat</h2>
+  <h2>Pointmaps Stay Robust as Training-Time Viewpoint Variation Increases</h2>
   <p class="body-text">
-    Back to the study from the top of the page. This time the policy also receives the
-    robot-centric pointmap. We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i>
-    to <i>High</i> (shown below), and both policies share the same backbone and training recipe.
+    We now revisit the training-time viewpoint variation study with pointmaps. Both policies share
+    the same backbone and training recipe, and camera poses are jittered per demonstration from
+    <i>No variation</i> to <i>High</i> (shown below). As viewpoint variation across training
+    demonstrations increases, RGB-only performance drops from 34.5% to 24.9%. In contrast,
+    RGB + Pointmap decreases only from 37.6% to 35.8%.
   </p>
   <figure>
     <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 880px;">
@@ -359,7 +369,7 @@
     <div>
       <div class="stat-line">
         <div class="stat-num good">37.6% &rarr; 35.8%</div>
-        <div class="stat-desc">The pointmap policy barely drops under the same camera variation. Its margin over RGB-only grows from +3.1 to +10.9.</div>
+        <div class="stat-desc">The pointmap margin over RGB-only grows from +3.1 to +10.9 as training-time viewpoint variation increases.</div>
       </div>
     </div>
   </div>
@@ -381,27 +391,26 @@
 
   <div class="takeaways">
     <details class="takeaway">
-      <summary><span class="tk-num">1</span>Pre-compute robot-frame geometry instead of making the policy learn the camera-to-robot transform.<span class="chev">&#9660;</span></summary>
+      <summary><span class="tk-num">1</span>Pre-compute Robot-Frame Geometry<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
-        <span class="rq-tag">RQ1 &middot; Give the policy camera info, or pre-apply the camera-to-robot transform to the observation?</span>
-        <p style="margin-top:8px;">All variants below see the same scene, and the last two receive the same depth, intrinsics, and extrinsics. Pre-computing the transform into a pointmap is worth <b>+3.1 points</b> over leaving it for the policy to infer.</p>
+        <p style="margin-top:8px;">The last two variants receive the same depth, intrinsics, and extrinsics, but only the pointmap provides robot-frame geometry directly. Using the same geometric inputs, directly providing robot-frame geometry improves success from <b>31.6% to 34.7%</b>.</p>
         <table class="mini">
-          <thead><tr><th>Input</th><th>Transform</th><th>SR</th></tr></thead>
+          <thead><tr><th>Input</th><th>Robot-frame geometry</th><th>SR</th></tr></thead>
           <tbody>
-            <tr><td>RGB</td><td>none</td><td>27.9</td></tr>
-            <tr><td>RGB + Pl&uuml;cker</td><td>learned</td><td>28.7</td></tr>
-            <tr><td>RGB + Pl&uuml;cker + Depth</td><td>learned</td><td>31.6</td></tr>
-            <tr class="ours"><td>RGB + Pointmap</td><td>pre-computed</td><td>34.7</td></tr>
+            <tr><td>RGB</td><td>not provided</td><td>27.9</td></tr>
+            <tr><td>RGB + Pl&uuml;cker</td><td>left to the policy</td><td>28.7</td></tr>
+            <tr><td>RGB + Pl&uuml;cker + Depth</td><td>left to the policy</td><td>31.6</td></tr>
+            <tr class="ours"><td>RGB + Pointmap</td><td>provided directly</td><td>34.7</td></tr>
           </tbody>
         </table>
       </div>
     </details>
 
     <details class="takeaway">
-      <summary><span class="tk-num">2</span>Keep 3D in image form. Pointmaps outperform point clouds.<span class="chev">&#9660;</span></summary>
+      <summary><span class="tk-num">2</span>Preserve the Image Grid<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
-        <span class="rq-tag">RQ2 &middot; Image-form pointmap or point cloud?</span>
-        <p style="margin-top:8px;">Preserving the H&thinsp;&times;&thinsp;W grid lets pointmap tokens be <b>added element-wise</b> to spatially corresponding RGB tokens, reaching <b>34.7 SR</b>, above a pretrained Point Transformer v3 point-cloud branch (32.8) and an MLP point-cloud branch (24.2). Concatenating pointmap tokens as a separate sequence instead of adding them drops performance to 30.7.</p>
+        <p style="margin-top:8px;">Pointmaps preserve the dense image grid and outperform both point-cloud branches, reaching <b>34.7</b> vs. 32.8 for a pretrained Point Transformer v3 branch and 24.2 for an MLP branch.</p>
+        <p>Because RGB and pointmap tokens are spatially aligned on the same grid, element-wise addition improves success from <b>30.7% to 34.7%</b> compared to concatenating pointmap tokens as a separate sequence.</p>
         <figure>
           <img src="static/images/fig5_fusion.png" alt="Element-wise addition preserves spatial correspondence; concatenation treats pointmap tokens as a separate sequence." style="max-width: 540px;">
         </figure>
@@ -409,10 +418,10 @@
     </details>
 
     <details class="takeaway">
-      <summary><span class="tk-num">3</span>Center the pointmap at the end effector, not the robot base.<span class="chev">&#9660;</span></summary>
+      <summary><span class="tk-num">3</span>Center Geometry at the End Effector<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
-        <span class="rq-tag">RQ3 &middot; Which coordinate origin?</span>
-        <p style="margin-top:8px;">In the robot-base frame, grasp targets are scattered across the workspace. In the EE-centered frame they collapse near (0,&thinsp;0,&thinsp;0) at grasp time, giving the policy a consistent local geometry. EE-centering lifts SR from 34.7 to <b>36.9</b>, and under randomized evaluation viewpoints it degrades by only <b>&minus;0.3</b> vs. &minus;2.0 for base centering.</p>
+        <p style="margin-top:8px;">End-effector centering reduces variation caused by absolute workspace location, making similar interactions appear in a more consistent local coordinate system.</p>
+        <p>Empirically, it improves success from 34.7 to <b>36.9</b> at a fixed evaluation viewpoint, and under randomized evaluation viewpoints it degrades by only <b>&minus;0.3</b>, compared to &minus;2.0 for base centering.</p>
         <figure>
           <img src="static/images/fig4_ee_centering.png" alt="End-effector centering concentrates interaction targets near a common origin.">
         </figure>
@@ -426,18 +435,46 @@
 
 <!-- =============================== SIMULATION RESULTS =============================== -->
 <section class="container" id="results">
-  <h2>Pointmaps Lift Both VLA Backbones</h2>
+  <h2>Pointmaps Improve Both Pretrained Backbones</h2>
   <p class="body-text">
-    On RoboCasa H50 (24 tasks, 50 demos each), pointmaps lift two pretrained VLAs of different scales
-    and action experts, <b>+7.6</b> on &pi;<sub>0.5</sub> and <b>+4.2</b> on SmolVLA.
-    &pi;<sub>0.5</sub> + pointmap reaches <b>62.9</b> average success, ahead of every camera-aware,
-    3D-augmented, and point-cloud baseline. All baselines except FP3 share the
-    &pi;<sub>0.5</sub> backbone, so the comparison isolates <i>how</i> spatial information is supplied.
+    On RoboCasa H50 (24 tasks, 50 demos each), pointmaps improve both pretrained backbones:
+    <b>+7.6</b> points on &pi;<sub>0.5</sub> and <b>+4.2</b> points on SmolVLA.
   </p>
 
+  <div class="row2" style="max-width: 720px; margin: 22px auto;">
+    <div class="stat-line">
+      <div class="stat-num good">55.3 &rarr; 62.9</div>
+      <div class="stat-desc">&pi;<sub>0.5</sub> average success with pointmaps (+7.6).</div>
+    </div>
+    <div class="stat-line">
+      <div class="stat-num good">37.2 &rarr; 41.4</div>
+      <div class="stat-desc">SmolVLA average success with pointmaps (+4.2).</div>
+    </div>
+  </div>
+
+  <p class="body-text">
+    With &pi;<sub>0.5</sub>, pointmaps reach <b>62.9%</b> average success, outperforming all
+    camera-aware and 3D-augmented baselines.
+  </p>
+
+  <table class="mini" style="margin: 14px auto 6px;">
+    <thead><tr><th>Method</th><th>Avg. SR</th></tr></thead>
+    <tbody>
+      <tr><td>FP3 (point-cloud policy)</td><td>42.8</td></tr>
+      <tr><td>OC-VLA (camera-aware)</td><td>56.3</td></tr>
+      <tr><td>KYC (camera-aware)</td><td>59.1</td></tr>
+      <tr><td>GeoVLA (3D-augmented)</td><td>57.1</td></tr>
+      <tr><td>PointVLA (3D-augmented)</td><td>57.3</td></tr>
+      <tr class="ours"><td>&pi;<sub>0.5</sub> + Pointmap (ours)</td><td>62.9</td></tr>
+    </tbody>
+  </table>
+
+  <details class="takeaway" style="max-width: 860px; margin: 22px auto 0;">
+    <summary>Full RoboCasa results (per-category breakdown)<span class="chev">&#9660;</span></summary>
+    <div class="tk-body" style="padding: 2px 16px 18px;">
   <div class="table-wrap">
     <table class="results">
-      <caption>Success rate (%) on RoboCasa H50, fixed evaluation viewpoint, averaged over 24 tasks.</caption>
+      <caption>Success rate (%) on RoboCasa H50, fixed evaluation viewpoint, averaged over 24 tasks. Except for FP3, all compared methods use the same &pi;<sub>0.5</sub> backbone.</caption>
       <thead>
         <tr><th>Method</th><th>Avg.</th><th>Doors</th><th>Drawers</th><th>Coffee</th><th>Pick-and-place</th><th>Turn objects</th></tr>
       </thead>
@@ -458,6 +495,8 @@
       </tbody>
     </table>
   </div>
+    </div>
+  </details>
 </section>
 
 <hr class="section-divider">
@@ -468,9 +507,20 @@
   <p class="body-text">
     We collect demonstrations on a Franka Research 3 while physically repositioning the external camera
     across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
-    <b>held-out (unseen)</b> placement. The pointmap's margin over RGB-only &pi;<sub>0.5</sub> widens from
-    <b>+5.0</b> at the seen placement to <b>+11.7</b> at the unseen one.
+    <b>held-out (unseen)</b> placement. The pointmap advantage grows from <b>+5.0</b> points at the seen
+    camera placement to <b>+11.7</b> points at the unseen placement.
   </p>
+
+  <div class="row2" style="max-width: 720px; margin: 22px auto;">
+    <div class="stat-line">
+      <div class="stat-num good">73.3 &rarr; 78.3</div>
+      <div class="stat-desc">Seen camera placement, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+5.0).</div>
+    </div>
+    <div class="stat-line">
+      <div class="stat-num good">55.0 &rarr; 66.7</div>
+      <div class="stat-desc">Unseen camera placement, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+11.7).</div>
+    </div>
+  </div>
 
   <figure class="framed">
     <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
@@ -497,11 +547,8 @@
   <h3 style="text-align:center;">Rollouts: Seen vs. Unseen Camera Placement</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Every clip stacks &pi;<sub>0.5</sub> (top row) over &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
-    At the seen placements both policies perform well. At the held-out placement the RGB-only
-    policy often fails while the pointmap policy holds.
-    Note that all clips are filmed by a separate viewing camera, so the two columns look framed
-    alike. What moves is the <b>policy's input camera</b>, which in the unseen column sits at a
-    placement never seen during training.
+    Note: videos are recorded from a fixed observer camera. <b>Seen</b> and <b>Unseen</b> refer to
+    the external camera used as the policy input.
   </p>
 
   <div class="task-block">
