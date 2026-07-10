@@ -79,6 +79,17 @@
 
     .tagline b { color: var(--accent-dark); }
 
+    /* problem-evidence row (intro, CamVLA-style claim + numbers) */
+    .evidence-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: center; max-width: 900px; margin: 30px auto 0; }
+    @media (max-width: 760px) { .evidence-row { grid-template-columns: 1fr; } }
+    .stat-line { padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
+    .stat-line + .stat-line { margin-top: 14px; }
+    .stat-num { font-size: 25px; font-weight: 700; line-height: 1.2; }
+    .stat-num.bad { color: #b91c1c; }
+    .stat-num.good { color: #15803d; }
+    .stat-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
+    .rootcause { text-align: center; font-size: 15.5px; max-width: 780px; margin: 24px auto 0; }
+
     /* ---------- Sections ---------- */
     h2 {
       font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 22px;
@@ -262,10 +273,30 @@
   <h2>Cameras Move. Actions Don't.</h2>
   <p class="body-text" style="text-align:center;">
     Robot demonstrations are collected with cameras at ever-different placements, yet the policy
-    must always act in one fixed robot frame. We remove this observation-to-action gap at the
-    input: each RGB-D observation becomes a <b>robot-centric pointmap</b>, dense image-form 3D
-    geometry already expressed in the frame where actions are defined.
-    <b>The payoff grows exactly as training-time viewpoint variation grows.</b>
+    must always act in one fixed robot frame. The more the training viewpoints vary, the harder
+    the policy finds it to map what it sees to how it should move.
+  </p>
+
+  <div class="evidence-row">
+    <figure style="margin: 0;">
+      <img src="static/images/fig6_robustness.png" alt="Success rate vs. training-time camera variation: RGB-only drops from 34.5 to 24.9 while RGB + Pointmap stays between 37.6 and 35.8.">
+    </figure>
+    <div>
+      <div class="stat-line">
+        <div class="stat-num bad">34.5% &rarr; 24.9%</div>
+        <div class="stat-desc">RGB-only success keeps falling as training-camera variation grows from none to high.</div>
+      </div>
+      <div class="stat-line">
+        <div class="stat-num good">37.6% &rarr; 35.8%</div>
+        <div class="stat-desc">The same policy with a <b>robot-centric pointmap</b> input barely moves.</div>
+      </div>
+      <div class="stat-desc" style="margin-top: 12px;">Controlled study on RoboCasa H50. Same backbone, same recipe, only the input changes.</div>
+    </div>
+  </div>
+
+  <p class="rootcause">
+    The root cause is a frame mismatch. <b>Observations arrive in the camera frame, while actions
+    are defined in the robot frame</b>, and every camera move rewrites the mapping between them.
   </p>
 
 </section>
@@ -274,23 +305,22 @@
 
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
-  <h2>Method</h2>
+  <h2>3D in the Robot Frame, Shaped like an Image</h2>
 
   <p class="body-text">
-    Rather than leaving the policy to relate camera-frame observations to robot-frame actions,
-    we can give it an observation that already carries (1) 3D spatial information for manipulation,
-    and (2) that information in the robot's own coordinate frame.
-    <b>Which 3D input satisfies both, while still fitting the image interface of a pretrained VLA?</b>
+    We close this gap at the input. The observation we feed the policy should carry 3D geometry
+    for manipulation, express it in the robot's own coordinate frame, and still fit the dense
+    image interface of a pretrained VLA. <b>Which 3D input does all three?</b>
   </p>
 
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
-    <figcaption><b>Only the pointmap checks all three boxes.</b> Depth stays in the camera frame; a point cloud is robot-centric but discards the dense 2D grid. A robot-centric pointmap keeps the 2D grid, stays dense, and carries robot-frame 3D geometry.</figcaption>
+    <figcaption><b>Only the pointmap checks all three boxes.</b> Depth gives up the robot frame, and a point cloud gives up the dense image grid.</figcaption>
   </figure>
 
   <p class="body-text">
     A robot-centric pointmap stores, at each pixel, the 3D coordinate of that pixel's scene point
-    in the robot frame: the same physical point keeps the same value no matter where the camera is
+    in the robot frame. The same physical point keeps the same value no matter where the camera is
     placed. We additionally re-center it at the current end-effector position.
   </p>
   <p class="body-text" style="font-size: 14px; color: var(--muted);">
@@ -300,7 +330,7 @@
 
   <figure>
     <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 520px;">
-    <figcaption style="max-width: 520px;">RGB-D is lifted into a camera-frame pointmap, then transformed into the robot base frame. After the transform, the same physical point gets the same robot-frame coordinate in both views (its pixel location may still differ).</figcaption>
+    <figcaption style="max-width: 520px;"><b>The transform is a fixed change of coordinates, not learning.</b> RGB-D is lifted into a camera-frame pointmap, then mapped into the robot base frame by the calibrated camera-to-robot matrix. A point's pixel location may shift between views, but its robot-frame value does not.</figcaption>
   </figure>
 
 
@@ -314,10 +344,10 @@
 
 <!-- =============================== CONTROLLED ANALYSIS =============================== -->
 <section class="container" id="analysis">
-  <h2>Key Takeaways</h2>
+  <h2>Four Controlled Studies, One Design</h2>
   <p class="body-text" style="text-align:center;">
-    From controlled studies on RoboCasa H50: same backbone, same training recipe, only the 3D input changes.
-    Click each takeaway for the evidence.
+    In controlled studies on RoboCasa H50, we hold the backbone and training recipe fixed and change
+    only the 3D input. Click each takeaway for the evidence.
   </p>
   <p class="body-text" style="text-align:center; font-size: 14px; color: var(--muted); margin-top: -10px;">
     These studies use a &pi;-style backbone initialized from raw PaliGemma (no robot pretraining),
@@ -328,8 +358,8 @@
     <details class="takeaway">
       <summary><span class="tk-num">1</span>Pre-compute robot-frame geometry instead of making the policy learn the camera-to-robot transform.<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
-        <span class="rq-tag">RQ1 &middot; Provide camera info, or apply the transform for the policy?</span>
-        <p style="margin-top:8px;">All variants below see the same scene; the last two receive exactly the same depth, intrinsics, and extrinsics. Pre-computing the transform into a pointmap is worth <b>+3.1 points</b> over leaving it for the policy to infer.</p>
+        <span class="rq-tag">RQ1 &middot; Give the policy camera info, or pre-apply the camera-to-robot transform to the observation?</span>
+        <p style="margin-top:8px;">All variants below see the same scene, and the last two receive the same depth, intrinsics, and extrinsics. Pre-computing the transform into a pointmap is worth <b>+3.1 points</b> over leaving it for the policy to infer.</p>
         <table class="mini">
           <thead><tr><th>Input</th><th>Transform</th><th>SR</th></tr></thead>
           <tbody>
@@ -343,10 +373,10 @@
     </details>
 
     <details class="takeaway">
-      <summary><span class="tk-num">2</span>Keep 3D in image form: pointmaps outperform point clouds.<span class="chev">&#9660;</span></summary>
+      <summary><span class="tk-num">2</span>Keep 3D in image form. Pointmaps outperform point clouds.<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
         <span class="rq-tag">RQ2 &middot; Image-form pointmap or point cloud?</span>
-        <p style="margin-top:8px;">Preserving the H&thinsp;&times;&thinsp;W grid lets pointmap tokens be <b>added element-wise</b> to spatially corresponding RGB tokens: <b>34.7 SR</b>, above a pretrained Point Transformer v3 point-cloud branch (32.8) and an MLP point-cloud branch (24.2). Concatenating pointmap tokens as a separate sequence instead of adding them drops performance to 30.7.</p>
+        <p style="margin-top:8px;">Preserving the H&thinsp;&times;&thinsp;W grid lets pointmap tokens be <b>added element-wise</b> to spatially corresponding RGB tokens, reaching <b>34.7 SR</b>, above a pretrained Point Transformer v3 point-cloud branch (32.8) and an MLP point-cloud branch (24.2). Concatenating pointmap tokens as a separate sequence instead of adding them drops performance to 30.7.</p>
         <figure>
           <img src="static/images/fig5_fusion.png" alt="Element-wise addition preserves spatial correspondence; concatenation treats pointmap tokens as a separate sequence." style="max-width: 540px;">
         </figure>
@@ -357,23 +387,20 @@
       <summary><span class="tk-num">3</span>Center the pointmap at the end effector, not the robot base.<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
         <span class="rq-tag">RQ3 &middot; Which coordinate origin?</span>
-        <p style="margin-top:8px;">In the robot-base frame, grasp targets are scattered across the workspace; in the EE-centered frame they collapse near (0,&thinsp;0,&thinsp;0) at grasp time, giving the policy a consistent local geometry. EE-centering lifts SR from 34.7 to <b>36.9</b>, and under randomized evaluation viewpoints it degrades by only <b>&minus;0.3</b> vs. &minus;2.0 for base centering.</p>
+        <p style="margin-top:8px;">In the robot-base frame, grasp targets are scattered across the workspace. In the EE-centered frame they collapse near (0,&thinsp;0,&thinsp;0) at grasp time, giving the policy a consistent local geometry. EE-centering lifts SR from 34.7 to <b>36.9</b>, and under randomized evaluation viewpoints it degrades by only <b>&minus;0.3</b> vs. &minus;2.0 for base centering.</p>
         <figure>
           <img src="static/images/fig4_ee_centering.png" alt="End-effector centering concentrates interaction targets near a common origin.">
         </figure>
       </div>
     </details>
 
-    <details class="takeaway" open>
+    <details class="takeaway">
       <summary><span class="tk-num">4</span>The benefit grows as training-time viewpoint variation grows.<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
         <span class="rq-tag">RQ4 &middot; Does the design survive more camera randomization?</span>
-        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i>. As training-time camera randomization increases, RGB-only drops <b>34.5 &rarr; 24.9</b> while RGB + Pointmap stays nearly flat at <b>37.6 &rarr; 35.8</b>.</p>
+        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i> (the three levels behind the graph at the top of the page, shown below). The pointmap margin over RGB-only widens across the levels, <b>+3.1 &rarr; +9.0 &rarr; +10.9</b>.</p>
         <figure>
           <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 640px;">
-        </figure>
-        <figure>
-          <img src="static/images/fig6_robustness.png" alt="RGB drops sharply as camera variation increases; RGB + Pointmap stays stable." style="max-width: 440px;">
         </figure>
       </div>
     </details>
@@ -384,11 +411,12 @@
 
 <!-- =============================== SIMULATION RESULTS =============================== -->
 <section class="container" id="results">
-  <h2>Simulation Results</h2>
+  <h2>Pointmaps Lift Both VLA Backbones</h2>
   <p class="body-text">
-    On RoboCasa H50 (24 tasks, 50 demos each), pointmaps improve two pretrained VLAs of different scales
-    and action experts, and outperform camera-aware baselines (KYC, OC-VLA), 3D-augmented baselines
-    (GeoVLA, PointVLA), and a standalone point-cloud policy (FP3). All baselines except FP3 share the
+    On RoboCasa H50 (24 tasks, 50 demos each), pointmaps lift two pretrained VLAs of different scales
+    and action experts, <b>+7.6</b> on &pi;<sub>0.5</sub> and <b>+4.2</b> on SmolVLA.
+    &pi;<sub>0.5</sub> + pointmap reaches <b>62.9</b> average success, ahead of every camera-aware,
+    3D-augmented, and point-cloud baseline. All baselines except FP3 share the
     &pi;<sub>0.5</sub> backbone, so the comparison isolates <i>how</i> spatial information is supplied.
   </p>
 
@@ -421,7 +449,7 @@
 
 <!-- =============================== REAL ROBOT =============================== -->
 <section class="container" id="real-robot">
-  <h2>Real-Robot Experiments</h2>
+  <h2>On a Real Robot, the Gap Widens on an Unseen Camera</h2>
   <p class="body-text">
     We collect demonstrations on a Franka Research 3 while physically repositioning the external camera
     across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
@@ -431,7 +459,7 @@
 
   <figure class="framed">
     <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>Setup.</b> A fixed wrist camera and one external camera placed at three training (red) and one held-out test (blue) positions. Tasks: pick-and-place, stack blocks, open drawer, close drawer.</figcaption>
+    <figcaption><b>Setup.</b> A fixed wrist camera and one external camera placed at three training (red) and one held-out test (blue) positions.</figcaption>
   </figure>
 
   <div class="table-wrap">
@@ -451,17 +479,17 @@
     </table>
   </div>
 
-  <h3 style="text-align:center;">Rollouts: Trained vs. Unseen Camera Placement</h3>
+  <h3 style="text-align:center;">Rollouts: Seen vs. Unseen Camera Placement</h3>
   <p class="body-text" style="text-align:center; font-size: 15.5px; color: var(--muted);">
-    Every clip shows &pi;<sub>0.5</sub> (top row) vs. &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
-    At trained placements both policies perform well; at the held-out placement the RGB-only
-    policy collapses while the pointmap policy holds.
+    Every clip stacks &pi;<sub>0.5</sub> (top row) over &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
+    At the seen placements both policies perform well. At the held-out placement the RGB-only
+    policy often fails while the pointmap policy holds.
   </p>
 
   <div class="task-block">
     <div class="task-name">Open drawer</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Trained camera</div>
+      <div><div class="vid-tag">Seen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4" type="video/mp4"></video></div>
       <div><div class="vid-tag unseen">Unseen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4" type="video/mp4"></video></div>
@@ -471,7 +499,7 @@
   <div class="task-block">
     <div class="task-name">Close drawer</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Trained camera</div>
+      <div><div class="vid-tag">Seen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4" type="video/mp4"></video></div>
       <div><div class="vid-tag unseen">Unseen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4" type="video/mp4"></video></div>
@@ -481,7 +509,7 @@
   <div class="task-block">
     <div class="task-name">Stack blocks</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Trained camera</div>
+      <div><div class="vid-tag">Seen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_stack.mp4" type="video/mp4"></video></div>
       <div><div class="vid-tag unseen">Unseen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_stack.mp4" type="video/mp4"></video></div>
@@ -491,7 +519,7 @@
   <div class="task-block">
     <div class="task-name">Pick &amp; place</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Trained camera</div>
+      <div><div class="vid-tag">Seen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_pnp.mp4" type="video/mp4"></video></div>
       <div><div class="vid-tag unseen">Unseen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4" type="video/mp4"></video></div>
