@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>See like a Robot: Robot-Centric Pointmaps for Vision-Language-Action Models</title>
+  <meta name="description" content="Robot-centric pointmaps give VLAs 3D geometry in the robot frame where actions are defined, while preserving the dense image grid expected by pretrained backbones.">
+  <!-- remove the line below to allow search-engine indexing -->
+  <meta name="robots" content="noindex, nofollow">
+  <!-- Open Graph (for link previews on Twitter/Slack etc.) -->
+  <meta property="og:title" content="See like a Robot: Robot-Centric Pointmaps for VLA Models">
+  <meta property="og:description" content="Robot-centric pointmaps give VLAs 3D geometry in the robot frame where actions are defined.">
+  <meta property="og:image" content="static/images/fig1_teaser.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text: #1f2430;
+      --muted: #5b6270;
+      --accent: #2563eb;      /* link blue */
+      --accent-dark: #1e40af;
+      --ours-bg: #eaf3ff;     /* shaded "ours" rows */
+      --border: #e3e6ec;
+      --card-bg: #f7f8fa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 17px;
+      background: #ffffff;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+    section.container { margin: 56px auto; }
+
+    /* ---------- Hero ---------- */
+    .hero { text-align: center; padding-top: 56px; }
+    h1.title {
+      font-size: clamp(26px, 4.2vw, 40px);
+      font-weight: 700; line-height: 1.25; margin-bottom: 22px;
+    }
+    h1.title .subtitle-break { display: block; }
+    .authors { font-size: 18px; margin-bottom: 6px; }
+    .authors a { color: var(--accent); text-decoration: none; }
+    .authors a:hover { text-decoration: underline; }
+    .authors sup { font-size: 12px; color: var(--muted); }
+    .affil { font-size: 16px; color: var(--muted); margin-bottom: 4px; }
+    .eqnote { font-size: 13.5px; color: var(--muted); margin-bottom: 26px; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #222831; color: #fff; text-decoration: none;
+      font-size: 15.5px; font-weight: 600;
+      border-radius: 999px; padding: 9px 20px;
+      transition: background .15s ease, transform .15s ease;
+    }
+    .btn:hover { background: #000; transform: translateY(-1px); }
+    .btn.disabled { background: #9aa0ab; cursor: default; pointer-events: none; }
+    .btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* ---------- Figures ---------- */
+    figure { margin: 28px 0; text-align: center; }
+    figure img {
+      max-width: 100%; height: auto; border-radius: 6px;
+    }
+    figure.framed img { border: 1px solid var(--border); padding: 10px; background: #fff; }
+    figcaption {
+      max-width: 820px; margin: 12px auto 0; font-size: 14.5px; color: var(--muted); line-height: 1.55;
+      text-align: left;
+    }
+    figcaption b { color: var(--text); }
+    .tagline {
+      text-align: center; font-size: 19px; max-width: 780px; margin: 26px auto 30px; color: var(--text);
+    }
+
+    .tagline b { color: var(--accent-dark); }
+
+    /* ---------- Sections ---------- */
+    h2 {
+      font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 22px;
+    }
+    h3 { font-size: 20px; font-weight: 700; margin: 30px 0 10px; }
+    p.body-text { max-width: 860px; margin: 0 auto 16px; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 0 auto; max-width: 960px; }
+
+    /* Key takeaways (collapsible) */
+    .takeaways { max-width: 860px; margin: 0 auto; }
+    details.takeaway {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+      margin: 12px 0; overflow: hidden;
+    }
+    details.takeaway summary {
+      list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 12px;
+      padding: 16px 20px; font-size: 17px; font-weight: 700; line-height: 1.5;
+    }
+    details.takeaway summary::-webkit-details-marker { display: none; }
+    details.takeaway summary .tk-num {
+      flex: none; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-dark); color: #fff; font-size: 14px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      align-self: flex-start; margin-top: 2px;
+    }
+    details.takeaway summary .chev {
+      margin-left: auto; align-self: center; flex: none;
+      color: var(--muted); font-size: 13px; transition: transform .2s ease;
+    }
+    details.takeaway[open] summary .chev { transform: rotate(180deg); }
+    details.takeaway summary:hover { background: #eef0f4; }
+    .tk-body { padding: 2px 20px 18px 58px; font-size: 15.5px; color: var(--muted); }
+    .tk-body b { color: var(--text); }
+    .tk-body figure { margin: 16px 0 4px; }
+    .tk-body .rq-tag { font-size: 13px; font-weight: 600; color: var(--accent-dark); letter-spacing: .03em; }
+    table.mini {
+      border-collapse: collapse; font-size: 14.5px; margin: 12px 0 4px;
+    }
+    table.mini th, table.mini td { padding: 5px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+    table.mini td:first-child, table.mini th:first-child { text-align: left; }
+    table.mini thead th { border-bottom: 2px solid var(--text); }
+    table.mini tr.ours { background: var(--ours-bg); font-weight: 600; }
+
+    /* two-column media rows */
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; margin: 28px 0; }
+    @media (max-width: 760px) { .row2 { grid-template-columns: 1fr; } }
+
+    /* equation block */
+    .eqs {
+      max-width: 640px; margin: 10px auto 34px; background: var(--card-bg);
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px;
+    }
+    .eq { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 7px 0; flex-wrap: wrap; }
+    .eq + .eq { border-top: 1px dashed var(--border); }
+    .eq-math { font-family: "STIX Two Math", "Cambria Math", Georgia, serif; font-size: 16.5px; white-space: nowrap; }
+    .eq-note { font-size: 13.5px; color: var(--muted); }
+
+    /* ---------- Tables ---------- */
+    .table-wrap { overflow-x: auto; margin: 24px auto; }
+    table.results {
+      border-collapse: collapse; margin: 0 auto; font-size: 15px; min-width: 640px;
+    }
+    table.results caption {
+      caption-side: top; text-align: left; font-size: 14.5px; color: var(--muted); padding-bottom: 10px;
+    }
+    table.results th, table.results td { padding: 7px 14px; text-align: center; }
+    table.results thead th { border-bottom: 2px solid var(--text); font-weight: 700; }
+    table.results td:first-child, table.results th:first-child { text-align: left; }
+    table.results tbody tr { border-bottom: 1px solid var(--border); }
+    table.results tr.group td { font-style: italic; color: var(--muted); border-bottom: none; padding-top: 12px; }
+    table.results tr.ours { background: var(--ours-bg); }
+    table.results tr.ours td { font-weight: 600; }
+    table.results .best { font-weight: 700; }
+
+    /* ---------- Video placeholder ---------- */
+    .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 640px) { .video-grid { grid-template-columns: 1fr; } }
+    .video-slot {
+      border: 2px dashed #c9ced8; border-radius: 10px; aspect-ratio: 16/9;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 15px; text-align: center; padding: 12px;
+      background: var(--card-bg);
+    }
+    .video-grid video { width: 100%; border-radius: 10px; display: block; }
+    .teaser-video { max-width: 860px; margin: 28px auto 0; }
+    .teaser-video video, .wide-video video { width: 100%; border-radius: 10px; display: block; }
+    .wide-video { max-width: 900px; margin: 24px auto 0; }
+
+    /* per-task rollout gallery */
+    .task-block { max-width: 900px; margin: 30px auto 0; }
+    .task-name { font-weight: 700; font-size: 17px; margin-bottom: 8px; text-align: center; }
+    .vid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .vid-pair { grid-template-columns: 1fr; } }
+    .vid-pair video { width: 100%; border-radius: 8px; display: block; }
+    .vid-tag {
+      font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px;
+      text-align: center; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .vid-tag.unseen { color: var(--accent-dark); }
+
+    /* ---------- BibTeX ---------- */
+    .bibtex-box { position: relative; max-width: 860px; margin: 20px auto 0; }
+    pre.bibtex {
+      background: #f4f5f7; border: 1px solid var(--border); border-radius: 10px;
+      padding: 22px 24px; overflow-x: auto; font-size: 14px; line-height: 1.5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; padding: 5px 12px; cursor: pointer; color: var(--muted);
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ---------- Footer ---------- */
+    footer {
+      border-top: 1px solid var(--border); margin-top: 70px; padding: 28px 0 40px;
+      font-size: 14px; color: var(--muted); text-align: center;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- =============================== HERO =============================== -->
+<div class="container hero">
+  <h1 class="title">See like a Robot: <span class="subtitle-break">Robot-Centric Pointmaps for Vision-Language-Action Models</span></h1>
+
+  <p class="authors">
+    <!-- TODO: 개인 홈페이지 링크로 교체 (없는 사람은 <a> 제거) -->
+    <a href="#">Byungkun Lee</a><sup>1*</sup>,
+    <a href="#">Dongyoon Hwang</a><sup>1*</sup>,
+    <a href="#">Minho Park</a><sup>1</sup>,
+    <a href="#">Hojoon Lee</a><sup>2</sup>,
+    <a href="#">Dongjin Kim</a><sup>1</sup>,
+    <a href="#">Jaegul Choo</a><sup>1</sup>
+  </p>
+  <p class="affil"><sup>1</sup>KAIST&emsp;<sup>2</sup>Holiday Robotics</p>
+  <p class="eqnote"><sup>*</sup>Equal contribution</p>
+
+  <div class="btn-row">
+    <!-- TODO: arXiv 공개 후 링크 교체 -->
+    <a class="btn" href="#">
+      <svg viewBox="0 0 384 512"><path d="M181.9 256.1c-5-16-4.9-46.9-2-46.9 8.4 0 7.6 36.9 2 46.9zm-1.7 47.2c-7.7 20.2-17.3 43.3-28.4 62.7 18.3-7 39-17.2 62.9-21.9-12.7-9.6-24.9-23.4-34.5-40.8zM86.1 428.1c0 .8 13.2-5.4 34.9-40.2-6.7 6.3-29.1 24.5-34.9 40.2zM248 160h136v328c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V24C0 10.7 10.7 0 24 0h200v136c0 13.2 10.8 24 24 24zm-8 171.8c-20-12.2-33.3-29-42.7-53.8 4.5-18.5 11.6-46.6 6.2-64.2-4.7-29.4-42.4-26.5-47.8-6.8-5 18.3-.4 44.1 8.1 77-11.6 27.6-28.7 64.6-40.8 85.8-.1 0-.1.1-.2.1-27.1 13.9-73.6 44.5-54.5 68 5.6 6.9 16 10 21.5 10 17.9 0 35.7-18 61.1-61.8 25.8-8.5 54.1-19.1 79-23.2 21.7 11.8 47.1 19.5 64 19.5 29.2 0 31.2-32 19.7-43.4-13.9-13.6-54.3-9.7-73.6-7.2zM377 105L279 7c-4.5-4.5-10.6-7-17-7h-6v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-74.1 255.3c4.1-2.7-2.5-11.9-42.8-9 37.1 15.8 42.8 9 42.8 9z"/></svg>
+      arXiv
+    </a>
+    <!-- TODO: 최종 PDF 파일을 static/ 에 넣고 링크 연결하거나, arXiv abs 링크로 대체 -->
+    <a class="btn" href="#">
+      <svg viewBox="0 0 512 512"><path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V304H176c-35.3 0-64 28.7-64 64V512H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128zM176 352h32c30.9 0 56 25.1 56 56s-25.1 56-56 56H192v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24H192v48h16zm96-80h32c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H304c-8.8 0-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H320v96h16zm80-112c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16s-7.2 16-16 16H448v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16H448v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V368z"/></svg>
+      Paper
+    </a>
+    <!-- TODO: 코드 공개 시 링크 교체, 비공개면 class="btn disabled" 로 두고 "Code (soon)" -->
+    <a class="btn disabled" href="#">
+      <svg viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8z"/></svg>
+      Code
+    </a>
+    <a class="btn" href="#bibtex">
+      <svg viewBox="0 0 448 512"><path d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z"/></svg>
+      BibTeX
+    </a>
+  </div>
+</div>
+
+<!-- =============================== TEASER (1-min overview video) =============================== -->
+<div class="container">
+  <!-- ============================================================
+       TODO(티저 비디오): 1분짜리 overview 영상이 준비되면
+       static/videos/teaser.mp4 로 넣고 아래 placeholder div를
+       다음 코드로 교체:
+       <div class="teaser-video">
+         <video autoplay muted loop playsinline controls>
+           <source src="static/videos/teaser.mp4" type="video/mp4">
+         </video>
+       </div>
+       ============================================================ -->
+  <div class="video-slot" style="max-width: 860px; margin: 28px auto 0;">1-minute overview video<br>(coming soon)</div>
+</div>
+
+<!-- =============================== SETTING =============================== -->
+<section class="container" id="setting">
+  <h2>Cameras Move. Actions Don't.</h2>
+  <p class="body-text" style="text-align:center;">
+    Robot demonstrations are collected with cameras at ever-different placements, yet the policy
+    must always act in one fixed robot frame. We remove this observation-to-action gap at the
+    input: each RGB-D observation becomes a <b>robot-centric pointmap</b>, dense image-form 3D
+    geometry already expressed in the frame where actions are defined.
+    <b>The payoff grows exactly as training-time viewpoint variation grows</b> (Takeaway 4).
+  </p>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== METHOD =============================== -->
+<section class="container" id="method">
+  <h2>Method</h2>
+
+  <figure>
+    <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
+    <figcaption><b>Which 3D input should a VLA see?</b> Depth stays in the camera frame; a point cloud is robot-centric but discards the dense 2D grid. A robot-centric pointmap is the only input that keeps the 2D grid, stays dense, and carries robot-frame 3D geometry.</figcaption>
+  </figure>
+
+  <p class="body-text">
+    A robot-centric pointmap stores, at each pixel, the 3D coordinate of that pixel's scene point
+    in the robot frame: the same physical point keeps the same value no matter where the camera is
+    placed. We additionally re-center it at the current end-effector position.
+  </p>
+  <p class="body-text" style="font-size: 14px; color: var(--muted);">
+    Requirements: an RGB-D camera with calibrated intrinsics and camera-to-robot extrinsics
+    (a one-time hand-eye calibration on the real robot), at both training and test time.
+  </p>
+
+  <figure>
+    <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 520px;">
+    <figcaption style="max-width: 520px;">RGB-D is lifted into a camera-frame pointmap, then transformed into the robot base frame. After the transform, the same physical point gets the same robot-frame coordinate in both views (its pixel location may still differ).</figcaption>
+  </figure>
+
+
+  <figure class="framed">
+    <img src="static/images/fig10_architecture.png" alt="Model architecture: RGB and pointmap are encoded by separate SigLIP towers and fused by element-wise addition before entering the pretrained VLA.">
+    <figcaption><b>Architecture.</b> RGB and pointmap are encoded by separate SigLIP vision towers (the pointmap tower is initialized from the RGB encoder), and pointmap tokens are <b>added element-wise</b> to the corresponding RGB tokens. Because the pointmap keeps the same H&thinsp;&times;&thinsp;W grid as RGB, no point-cloud encoder, voxel module, or extra token sequence is needed.</figcaption>
+  </figure>
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== CONTROLLED ANALYSIS =============================== -->
+<section class="container" id="analysis">
+  <h2>Key Takeaways</h2>
+  <p class="body-text" style="text-align:center;">
+    From controlled studies on RoboCasa H50: same backbone, same training recipe, only the 3D input changes.
+    Click each takeaway for the evidence.
+  </p>
+  <p class="body-text" style="text-align:center; font-size: 14px; color: var(--muted); margin-top: -10px;">
+    These studies use a &pi;-style backbone initialized from raw PaliGemma (no robot pretraining),
+    so absolute numbers are lower than the pretrained-VLA results below.
+  </p>
+
+  <div class="takeaways">
+    <details class="takeaway">
+      <summary><span class="tk-num">1</span>Pre-compute robot-frame geometry instead of making the policy learn the camera-to-robot transform.<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <span class="rq-tag">RQ1 &middot; Provide camera info, or apply the transform for the policy?</span>
+        <p style="margin-top:8px;">All variants below see the same scene; the last two receive exactly the same depth, intrinsics, and extrinsics. Pre-computing the transform into a pointmap is worth <b>+3.1 points</b> over leaving it for the policy to infer.</p>
+        <table class="mini">
+          <thead><tr><th>Input</th><th>Transform</th><th>SR</th></tr></thead>
+          <tbody>
+            <tr><td>RGB</td><td>none</td><td>27.9</td></tr>
+            <tr><td>RGB + Pl&uuml;cker</td><td>learned</td><td>28.7</td></tr>
+            <tr><td>RGB + Pl&uuml;cker + Depth</td><td>learned</td><td>31.6</td></tr>
+            <tr class="ours"><td>RGB + Pointmap</td><td>pre-computed</td><td>34.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="takeaway">
+      <summary><span class="tk-num">2</span>Keep 3D in image form: pointmaps outperform point clouds.<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <span class="rq-tag">RQ2 &middot; Image-form pointmap or point cloud?</span>
+        <p style="margin-top:8px;">Preserving the H&thinsp;&times;&thinsp;W grid lets pointmap tokens be <b>added element-wise</b> to spatially corresponding RGB tokens: <b>34.7 SR</b>, above a pretrained Point Transformer v3 point-cloud branch (32.8) and an MLP point-cloud branch (24.2). Concatenating pointmap tokens as a separate sequence instead of adding them drops performance to 30.7.</p>
+        <figure>
+          <img src="static/images/fig5_fusion.png" alt="Element-wise addition preserves spatial correspondence; concatenation treats pointmap tokens as a separate sequence." style="max-width: 540px;">
+        </figure>
+      </div>
+    </details>
+
+    <details class="takeaway">
+      <summary><span class="tk-num">3</span>Center the pointmap at the end effector, not the robot base.<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <span class="rq-tag">RQ3 &middot; Which coordinate origin?</span>
+        <p style="margin-top:8px;">In the robot-base frame, grasp targets are scattered across the workspace; in the EE-centered frame they collapse near (0,&thinsp;0,&thinsp;0) at grasp time, giving the policy a consistent local geometry. EE-centering lifts SR from 34.7 to <b>36.9</b>, and under randomized evaluation viewpoints it degrades by only <b>&minus;0.3</b> vs. &minus;2.0 for base centering.</p>
+        <figure>
+          <img src="static/images/fig4_ee_centering.png" alt="End-effector centering concentrates interaction targets near a common origin.">
+        </figure>
+      </div>
+    </details>
+
+    <details class="takeaway" open>
+      <summary><span class="tk-num">4</span>The benefit grows as training-time viewpoint variation grows.<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <span class="rq-tag">RQ4 &middot; Does the design survive more camera randomization?</span>
+        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i>. As training-time camera randomization increases, RGB-only drops <b>34.5 &rarr; 24.9</b> while RGB + Pointmap stays nearly flat at <b>37.6 &rarr; 35.8</b>.</p>
+        <figure>
+          <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 640px;">
+        </figure>
+        <figure>
+          <img src="static/images/fig6_robustness.png" alt="RGB drops sharply as camera variation increases; RGB + Pointmap stays stable." style="max-width: 440px;">
+        </figure>
+      </div>
+    </details>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== SIMULATION RESULTS =============================== -->
+<section class="container" id="results">
+  <h2>Simulation Results</h2>
+  <p class="body-text">
+    On RoboCasa H50 (24 tasks, 50 demos each), pointmaps improve two pretrained VLAs of different scales
+    and action experts, and outperform camera-aware baselines (KYC, OC-VLA), 3D-augmented baselines
+    (GeoVLA, PointVLA), and a standalone point-cloud policy (FP3). All baselines except FP3 share the
+    &pi;<sub>0.5</sub> backbone, so the comparison isolates <i>how</i> spatial information is supplied.
+  </p>
+
+  <div class="table-wrap">
+    <table class="results">
+      <caption>Success rate (%) on RoboCasa H50, fixed evaluation viewpoint, averaged over 24 tasks.</caption>
+      <thead>
+        <tr><th>Method</th><th>Avg.</th><th>Doors</th><th>Drawers</th><th>Coffee</th><th>Pick-and-place</th><th>Turn objects</th></tr>
+      </thead>
+      <tbody>
+        <tr class="group"><td colspan="7">Point-cloud policy</td></tr>
+        <tr><td>FP3</td><td>42.8</td><td>79.0</td><td>74.0</td><td>54.7</td><td>21.8</td><td>32.0</td></tr>
+        <tr class="group"><td colspan="7">Camera-aware VLAs</td></tr>
+        <tr><td>OC-VLA</td><td>56.3</td><td>80.0</td><td>80.0</td><td>42.0</td><td>50.5</td><td>48.9</td></tr>
+        <tr><td>KYC</td><td>59.1</td><td>86.5</td><td>86.0</td><td>51.3</td><td>48.2</td><td>51.4</td></tr>
+        <tr class="group"><td colspan="7">3D-augmented VLAs</td></tr>
+        <tr><td>GeoVLA</td><td>57.1</td><td>81.0</td><td>80.0</td><td>45.3</td><td>49.8</td><td>50.3</td></tr>
+        <tr><td>PointVLA</td><td>57.3</td><td>87.5</td><td>85.0</td><td>44.0</td><td>46.3</td><td>50.3</td></tr>
+        <tr class="group"><td colspan="7">Ours</td></tr>
+        <tr><td>&pi;<sub>0.5</sub></td><td>55.3</td><td>79.5</td><td>83.0</td><td>40.7</td><td>46.0</td><td>50.6</td></tr>
+        <tr class="ours"><td>&pi;<sub>0.5</sub> + pointmap</td><td class="best">62.9</td><td class="best">90.0</td><td class="best">90.0</td><td class="best">58.0</td><td class="best">52.8</td><td class="best">53.4</td></tr>
+        <tr><td>SmolVLA</td><td>37.2</td><td>68.0</td><td>63.0</td><td>39.3</td><td>6.5</td><td>46.6</td></tr>
+        <tr class="ours"><td>SmolVLA + pointmap</td><td>41.4</td><td>80.0</td><td>77.0</td><td>38.0</td><td>12.8</td><td>43.4</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== REAL ROBOT =============================== -->
+<section class="container" id="real-robot">
+  <h2>Real-Robot Experiments</h2>
+  <p class="body-text">
+    We collect demonstrations on a Franka Research 3 while physically repositioning the external camera
+    across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
+    <b>held-out (unseen)</b> placement. The pointmap's margin over RGB-only &pi;<sub>0.5</sub> widens from
+    <b>+5.0</b> at the seen placement to <b>+11.7</b> at the unseen one.
+  </p>
+
+  <figure class="framed">
+    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
+    <figcaption><b>Setup.</b> A fixed wrist camera and one external camera placed at three training (red) and one held-out test (blue) positions. Tasks: pick-and-place, stack blocks, open drawer, close drawer.</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table class="results">
+      <caption>Real-world success rate (%), 15 rollouts per task per camera condition. DP3 is a from-scratch point-cloud diffusion policy, unlike FP3 in the simulation table (a DROID-pretrained point-cloud foundation policy).</caption>
+      <thead>
+        <tr><th>Eval. camera</th><th>Model</th><th>Avg.</th><th>Pick-and-place</th><th>Stack blocks</th><th>Open drawer</th><th>Close drawer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="3">Seen</td><td>DP3</td><td>63.3</td><td>60.0</td><td>40.0</td><td>60.0</td><td>93.3</td></tr>
+        <tr><td>&pi;<sub>0.5</sub></td><td>73.3</td><td>80.0</td><td>53.3</td><td>73.3</td><td>86.7</td></tr>
+        <tr class="ours"><td>&pi;<sub>0.5</sub> + pointmap</td><td class="best">78.3</td><td class="best">86.7</td><td class="best">60.0</td><td>73.3</td><td class="best">93.3</td></tr>
+        <tr><td rowspan="3">Unseen</td><td>DP3</td><td>48.3</td><td>33.3</td><td>33.3</td><td>40.0</td><td>86.7</td></tr>
+        <tr><td>&pi;<sub>0.5</sub></td><td>55.0</td><td>40.0</td><td>26.7</td><td>66.7</td><td>86.7</td></tr>
+        <tr class="ours"><td>&pi;<sub>0.5</sub> + pointmap</td><td class="best">66.7</td><td class="best">53.3</td><td class="best">46.7</td><td class="best">73.3</td><td class="best">93.3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="text-align:center;">Rollouts: Trained vs. Unseen Camera Placement</h3>
+  <p class="body-text" style="text-align:center; font-size: 15.5px; color: var(--muted);">
+    Every clip shows &pi;<sub>0.5</sub> (top row) vs. &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
+    At trained placements both policies perform well; at the held-out placement the RGB-only
+    policy collapses while the pointmap policy holds.
+  </p>
+
+  <div class="task-block">
+    <div class="task-name">Open drawer</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Trained camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="task-name">Close drawer</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Trained camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="task-name">Stack blocks</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Trained camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_stack.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_stack.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="task-name">Pick &amp; place</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Trained camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_pnp.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== BIBTEX =============================== -->
+<section class="container" id="bibtex">
+  <h2>BibTeX</h2>
+  <div class="bibtex-box">
+    <button class="copy-btn" onclick="copyBibtex(this)">Copy</button>
+<!-- TODO: arXiv 공개 / 논문 accept 후 실제 엔트리로 교체 -->
+<pre class="bibtex" id="bibtex-text">@article{lee2026seelikearobot,
+  title   = {See like a Robot: Robot-Centric Pointmaps for Vision-Language-Action Models},
+  author  = {Lee, Byungkun and Hwang, Dongyoon and Park, Minho and Lee, Hojoon and Kim, Dongjin and Choo, Jaegul},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    Website template adapted from <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>, licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.
+  </div>
+</footer>
+
+<script>
+function copyBibtex(btn) {
+  const text = document.getElementById('bibtex-text').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+  });
+}
+</script>
+
+</body>
+</html>
