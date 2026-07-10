@@ -308,19 +308,18 @@
   <h2>3D in the Robot Frame, Shaped like an RGB Image</h2>
 
   <p class="body-text">
-    We close this gap at the input. The observation we feed the policy should satisfy three
+    We close this gap at the input. The observation we feed the policy should satisfy two
     requirements at once:
   </p>
   <ul class="req-list">
-    <li><b>Metric 3D geometry.</b> Manipulation depends on where things are in space relative to the robot, and RGB appearance alone does not carry that.</li>
-    <li><b>Expressed in the robot frame.</b> Actions live there. If the observation already lives there too, the policy no longer has to learn the camera-to-robot transform.</li>
-    <li><b>Dense image form.</b> Pretrained VLAs expect an H&thinsp;&times;&thinsp;W grid of image tokens, and keeping that interface lets their pretrained vision towers be reused as-is.</li>
+    <li><b>3D spatial information in the robot's own coordinate frame.</b> Manipulation depends on where things are relative to the robot, and actions are defined in the robot frame. An observation that already carries robot-frame 3D spares the policy from learning the camera-to-robot transform.</li>
+    <li><b>A form that plugs into a pretrained VLA.</b> VLAs expect a dense H&thinsp;&times;&thinsp;W grid of image tokens. Keeping that interface lets their pretrained vision towers be reused as-is.</li>
   </ul>
-  <p class="body-text"><b>Which 3D input satisfies all three?</b></p>
+  <p class="body-text"><b>Which 3D input satisfies both?</b></p>
 
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
-    <figcaption><b>Only the pointmap checks all three boxes.</b> Depth gives up the robot frame, and a point cloud gives up the dense image grid.</figcaption>
+    <figcaption><b>Only the pointmap checks every box.</b> Depth gives up the robot frame, and a point cloud gives up the dense image grid.</figcaption>
   </figure>
 
   <p class="body-text">
