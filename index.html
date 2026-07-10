@@ -89,6 +89,8 @@
     .stat-num.good { color: #15803d; }
     .stat-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
     .rootcause { text-align: center; font-size: 15.5px; max-width: 780px; margin: 24px auto 0; }
+    ul.req-list { max-width: 860px; margin: 0 auto 16px; padding-left: 26px; }
+    ul.req-list li { margin: 7px 0; }
 
     /* ---------- Sections ---------- */
     h2 {
@@ -303,13 +305,18 @@
 
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
-  <h2>3D in the Robot Frame, Shaped like an Image</h2>
+  <h2>3D in the Robot Frame, Shaped like an RGB Image</h2>
 
   <p class="body-text">
-    We close this gap at the input. The observation we feed the policy should carry 3D geometry
-    for manipulation, express it in the robot's own coordinate frame, and still fit the dense
-    image interface of a pretrained VLA. <b>Which 3D input does all three?</b>
+    We close this gap at the input. The observation we feed the policy should satisfy three
+    requirements at once:
   </p>
+  <ul class="req-list">
+    <li><b>Metric 3D geometry.</b> Manipulation depends on where things are in space relative to the robot, and RGB appearance alone does not carry that.</li>
+    <li><b>Expressed in the robot frame.</b> Actions live there. If the observation already lives there too, the policy no longer has to learn the camera-to-robot transform.</li>
+    <li><b>Dense image form.</b> Pretrained VLAs expect an H&thinsp;&times;&thinsp;W grid of image tokens, and keeping that interface lets their pretrained vision towers be reused as-is.</li>
+  </ul>
+  <p class="body-text"><b>Which 3D input satisfies all three?</b></p>
 
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
@@ -321,30 +328,25 @@
     in the robot frame. The same physical point keeps the same value no matter where the camera is
     placed. We additionally re-center it at the current end-effector position.
   </p>
-  <p class="body-text" style="font-size: 14px; color: var(--muted);">
-    Requirements: an RGB-D camera with calibrated intrinsics and camera-to-robot extrinsics
-    (a one-time hand-eye calibration on the real robot), at both training and test time.
-  </p>
-
-  <figure>
-    <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 520px;">
-    <figcaption style="max-width: 520px;"><b>The transform is a fixed change of coordinates, not learning.</b> RGB-D is lifted into a camera-frame pointmap, then mapped into the robot base frame by the calibrated camera-to-robot matrix. A point's pixel location may shift between views, but its robot-frame value does not.</figcaption>
-  </figure>
-
-
-  <figure class="framed">
-    <img src="static/images/fig10_architecture.png" alt="Model architecture: RGB and pointmap are encoded by separate SigLIP towers and fused by element-wise addition before entering the pretrained VLA.">
-    <figcaption><b>Architecture.</b> RGB and pointmap are encoded by separate SigLIP vision towers (the pointmap tower is initialized from the RGB encoder), and pointmap tokens are <b>added element-wise</b> to the corresponding RGB tokens. Because the pointmap keeps the same H&thinsp;&times;&thinsp;W grid as RGB, no point-cloud encoder, voxel module, or extra token sequence is needed.</figcaption>
-  </figure>
+  <div class="row2" style="max-width: 920px; margin-left: auto; margin-right: auto;">
+    <figure style="margin: 0;">
+      <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 420px;">
+      <figcaption><b>The transform is a fixed change of coordinates, not learning.</b> RGB-D is lifted into a camera-frame pointmap, then mapped into the robot base frame by the calibrated camera-to-robot matrix (a one-time hand-eye calibration on a real robot). A point's pixel location may shift between views, but its robot-frame value does not.</figcaption>
+    </figure>
+    <figure style="margin: 0;">
+      <img src="static/images/fig10_fusion_crop.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 440px;">
+      <figcaption><b>One extra tower, one addition.</b> A second SigLIP tower, initialized from the RGB encoder, encodes the pointmap. Its tokens are <b>added element-wise</b> to the matching RGB tokens, and the rest of the VLA stays untouched. Same H&thinsp;&times;&thinsp;W grid, so no point-cloud encoder or extra token sequence.</figcaption>
+    </figure>
+  </div>
 </section>
 
 <hr class="section-divider">
 
 <!-- =============================== PAYOFF (mirrors the intro study) =============================== -->
 <section class="container" id="payoff">
-  <h2>Add the Pointmap. The Line Goes Flat.</h2>
+  <h2>With Pointmaps, the Curve Stays Flat</h2>
   <p class="body-text">
-    This is the same study as the top of the page, with one change: the policy now also receives the
+    This is the same study as the top of the page, with one change. The policy now also receives the
     robot-centric pointmap. We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i>
     to <i>High</i> (shown below), and both policies share the same backbone and training recipe.
   </p>
@@ -370,8 +372,9 @@
 <section class="container" id="analysis">
   <h2>Three Controlled Studies, One Design</h2>
   <p class="body-text">
-    In controlled studies on RoboCasa H50, we hold the backbone and training recipe fixed and change
-    only the 3D input. Click each takeaway for the evidence.
+    Why pre-computed robot-frame geometry, image form, and end-effector centering? Each design
+    choice has its own controlled ablation on RoboCasa H50. The backbone and training recipe stay
+    fixed, and only the 3D input changes.
   </p>
   <p class="body-text" style="font-size: 14px; color: var(--muted); margin-top: -10px;">
     These studies use a &pi;-style backbone initialized from raw PaliGemma (no robot pretraining),
@@ -498,27 +501,10 @@
     Every clip stacks &pi;<sub>0.5</sub> (top row) over &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
     At the seen placements both policies perform well. At the held-out placement the RGB-only
     policy often fails while the pointmap policy holds.
+    Note that all clips are filmed by a separate viewing camera, so the two columns look framed
+    alike. What moves is the <b>policy's input camera</b>, which in the unseen column sits at a
+    placement never seen during training.
   </p>
-
-  <div class="task-block">
-    <div class="task-name">Open drawer</div>
-    <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4" type="video/mp4"></video></div>
-    </div>
-  </div>
-
-  <div class="task-block">
-    <div class="task-name">Close drawer</div>
-    <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4" type="video/mp4"></video></div>
-    </div>
-  </div>
 
   <div class="task-block">
     <div class="task-name">Stack blocks</div>
@@ -537,6 +523,26 @@
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_pnp.mp4" type="video/mp4"></video></div>
       <div><div class="vid-tag unseen">Unseen camera</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="task-name">Open drawer</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Seen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4" type="video/mp4"></video></div>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="task-name">Close drawer</div>
+    <div class="vid-pair">
+      <div><div class="vid-tag">Seen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4" type="video/mp4"></video></div>
+      <div><div class="vid-tag unseen">Unseen camera</div>
+        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4" type="video/mp4"></video></div>
     </div>
   </div>
 </section>
