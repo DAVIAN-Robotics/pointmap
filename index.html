@@ -279,25 +279,20 @@
 
   <div class="evidence-row">
     <figure style="margin: 0;">
-      <img src="static/images/fig6_robustness.png" alt="Success rate vs. training-time camera variation: RGB-only drops from 34.5 to 24.9 while RGB + Pointmap stays between 37.6 and 35.8.">
+      <img src="static/images/fig6_rgb_only.png" alt="Success rate of an RGB-only policy falls from 34.5 to 24.9 as training-time camera variation grows.">
     </figure>
     <div>
       <div class="stat-line">
         <div class="stat-num bad">34.5% &rarr; 24.9%</div>
-        <div class="stat-desc">RGB-only success keeps falling as training-camera variation grows from none to high.</div>
+        <div class="stat-desc">RGB-only success keeps falling as training-camera variation grows from none to high (RoboCasa H50).</div>
       </div>
-      <div class="stat-line">
-        <div class="stat-num good">37.6% &rarr; 35.8%</div>
-        <div class="stat-desc">The same policy with a <b>robot-centric pointmap</b> input barely moves.</div>
-      </div>
-      <div class="stat-desc" style="margin-top: 12px;">Controlled study on RoboCasa H50. Same backbone, same recipe, only the input changes.</div>
+      <p style="font-size: 15.5px; margin-top: 16px;">
+        The root cause is a frame mismatch. <b>Observations arrive in the camera frame, while
+        actions are defined in the robot frame</b>, and every camera move rewrites the mapping
+        between them.
+      </p>
     </div>
   </div>
-
-  <p class="rootcause">
-    The root cause is a frame mismatch. <b>Observations arrive in the camera frame, while actions
-    are defined in the robot frame</b>, and every camera move rewrites the mapping between them.
-  </p>
 
 </section>
 
@@ -394,13 +389,16 @@
       </div>
     </details>
 
-    <details class="takeaway">
+    <details class="takeaway" open>
       <summary><span class="tk-num">4</span>The benefit grows as training-time viewpoint variation grows.<span class="chev">&#9660;</span></summary>
       <div class="tk-body">
         <span class="rq-tag">RQ4 &middot; Does the design survive more camera randomization?</span>
-        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i> (the three levels behind the graph at the top of the page, shown below). The pointmap margin over RGB-only widens across the levels, <b>+3.1 &rarr; +9.0 &rarr; +10.9</b>.</p>
+        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i> (the same three levels as the graph at the top of the page, shown below). Where the RGB-only policy kept falling, the pointmap policy barely moves, <b>37.6 &rarr; 35.8</b>, and its margin widens across the levels, <b>+3.1 &rarr; +9.0 &rarr; +10.9</b>.</p>
         <figure>
           <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 640px;">
+        </figure>
+        <figure>
+          <img src="static/images/fig6_robustness.png" alt="RGB drops sharply as camera variation increases; RGB + Pointmap stays stable." style="max-width: 440px;">
         </figure>
       </div>
     </details>
