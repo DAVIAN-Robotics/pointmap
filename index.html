@@ -276,9 +276,16 @@
 <section class="container" id="method">
   <h2>Method</h2>
 
+  <p class="body-text">
+    Rather than leaving the policy to relate camera-frame observations to robot-frame actions,
+    we can give it an observation that already carries (1) 3D spatial information for manipulation,
+    and (2) that information in the robot's own coordinate frame.
+    <b>Which 3D input satisfies both, while still fitting the image interface of a pretrained VLA?</b>
+  </p>
+
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
-    <figcaption><b>Which 3D input should a VLA see?</b> Depth stays in the camera frame; a point cloud is robot-centric but discards the dense 2D grid. A robot-centric pointmap is the only input that keeps the 2D grid, stays dense, and carries robot-frame 3D geometry.</figcaption>
+    <figcaption><b>Only the pointmap checks all three boxes.</b> Depth stays in the camera frame; a point cloud is robot-centric but discards the dense 2D grid. A robot-centric pointmap keeps the 2D grid, stays dense, and carries robot-frame 3D geometry.</figcaption>
   </figure>
 
   <p class="body-text">
