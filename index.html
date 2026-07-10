@@ -278,16 +278,17 @@
     memorize it.
   </p>
 
-  <div class="evidence-row">
+  <p class="body-text" style="text-align:center;">
+    But large-scale robot datasets aggregate demonstrations from many labs, each with its own
+    camera setup. Every new camera placement rewrites that mapping, turning it from one the
+    policy can memorize into one it must generalize across viewpoints.
+  </p>
+
+  <div class="evidence-row" style="max-width: 840px; margin-top: 26px;">
     <figure style="margin: 0;">
       <img src="static/images/fig6_rgb_only.png" alt="Success rate of an RGB-only policy falls from 34.5 to 24.9 as training-time camera variation grows.">
     </figure>
     <div>
-      <p style="font-size: 15.5px; margin-bottom: 16px;">
-        But large-scale robot datasets aggregate demonstrations from many labs, each with its own
-        camera setup. Every new camera placement rewrites that mapping, turning it from one the
-        policy can memorize into one it must generalize across viewpoints.
-      </p>
       <div class="stat-line">
         <div class="stat-num bad">34.5% &rarr; 24.9%</div>
         <div class="stat-desc">RGB-only success keeps falling as training-camera variation grows from none to high (RoboCasa H50).</div>
