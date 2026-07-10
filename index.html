@@ -319,7 +319,6 @@
 
   <figure>
     <img src="static/images/fig1_teaser.png" alt="Diverse camera viewpoints in training data, and comparison of depth, point cloud, and pointmap representations.">
-    <figcaption><b>Only the pointmap checks every box.</b> Depth gives up the robot frame, and a point cloud gives up the dense image grid.</figcaption>
   </figure>
 
   <p class="body-text">
@@ -330,11 +329,11 @@
   <div class="row2" style="max-width: 920px; margin-left: auto; margin-right: auto;">
     <figure style="margin: 0;">
       <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 420px;">
-      <figcaption><b>The transform is a fixed change of coordinates, not learning.</b> RGB-D is lifted into a camera-frame pointmap, then mapped into the robot base frame by the calibrated camera-to-robot matrix (a one-time hand-eye calibration on a real robot). A point's pixel location may shift between views, but its robot-frame value does not.</figcaption>
+      <figcaption>The camera-to-robot transform is a fixed change of coordinates (a one-time hand-eye calibration), not something the policy has to learn.</figcaption>
     </figure>
     <figure style="margin: 0;">
       <img src="static/images/fig10_fusion.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 420px;">
-      <figcaption><b>One extra tower, one addition.</b> A second SigLIP tower, initialized from the RGB encoder, encodes the pointmap. Its tokens are <b>added element-wise</b> to the matching RGB tokens, and the rest of the VLA stays untouched. Same H&thinsp;&times;&thinsp;W grid, so no point-cloud encoder or extra token sequence.</figcaption>
+      <figcaption>A second SigLIP tower, initialized from the RGB encoder, encodes the pointmap. Its tokens are added element-wise to the RGB tokens, so no point-cloud encoder or extra token sequence is needed.</figcaption>
     </figure>
   </div>
 </section>
