@@ -281,8 +281,8 @@
 
   <p class="body-text">
     But large-scale robot datasets aggregate demonstrations from many labs, each with its own
-    camera setup. <b>Every new camera placement rewrites that mapping. Instead of memorizing one
-    fixed mapping, the policy now has to generalize across viewpoints.</b>
+    camera setup. Every new camera placement rewrites that mapping. <b>Instead of memorizing one
+    fixed mapping, the policy must generalize across viewpoints, which is much harder.</b>
   </p>
 
   <div class="evidence-row" style="max-width: 840px; margin-top: 26px;">
@@ -340,9 +340,35 @@
 
 <hr class="section-divider">
 
+<!-- =============================== PAYOFF (mirrors the intro study) =============================== -->
+<section class="container" id="payoff">
+  <h2>Add the Pointmap. The Line Goes Flat.</h2>
+  <p class="body-text">
+    This is the same study as the top of the page, with one change: the policy now also receives the
+    robot-centric pointmap. We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i>
+    to <i>High</i> (shown below), and both policies share the same backbone and training recipe.
+  </p>
+  <figure>
+    <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 640px;">
+  </figure>
+  <div class="evidence-row" style="max-width: 840px;">
+    <figure style="margin: 0;">
+      <img src="static/images/fig6_robustness.png" alt="RGB drops sharply as camera variation increases; RGB + Pointmap stays nearly flat.">
+    </figure>
+    <div>
+      <div class="stat-line">
+        <div class="stat-num good">37.6% &rarr; 35.8%</div>
+        <div class="stat-desc">With the pointmap input, success barely moves under the same growing variation. The margin over RGB-only widens, +3.1 &rarr; +9.0 &rarr; +10.9.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
 <!-- =============================== CONTROLLED ANALYSIS =============================== -->
 <section class="container" id="analysis">
-  <h2>Four Controlled Studies, One Design</h2>
+  <h2>Three Controlled Studies, One Design</h2>
   <p class="body-text">
     In controlled studies on RoboCasa H50, we hold the backbone and training recipe fixed and change
     only the 3D input. Click each takeaway for the evidence.
@@ -392,19 +418,6 @@
       </div>
     </details>
 
-    <details class="takeaway" open>
-      <summary><span class="tk-num">4</span>The benefit grows as training-time viewpoint variation grows.<span class="chev">&#9660;</span></summary>
-      <div class="tk-body">
-        <span class="rq-tag">RQ4 &middot; Does the design survive more camera randomization?</span>
-        <p style="margin-top:8px;">We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i> to <i>High</i> (the same three levels as the graph at the top of the page, shown below). Where the RGB-only policy kept falling, the pointmap policy barely moves, <b>37.6 &rarr; 35.8</b>, and its margin widens across the levels, <b>+3.1 &rarr; +9.0 &rarr; +10.9</b>.</p>
-        <figure>
-          <img src="static/images/fig8_camera_distributions.png" alt="Camera-pose distributions: frustums spread wider from No variation to High." style="max-width: 640px;">
-        </figure>
-        <figure>
-          <img src="static/images/fig6_robustness.png" alt="RGB drops sharply as camera variation increases; RGB + Pointmap stays stable." style="max-width: 440px;">
-        </figure>
-      </div>
-    </details>
   </div>
 </section>
 
