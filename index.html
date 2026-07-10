@@ -323,13 +323,14 @@
 
   <p class="body-text">
     A robot-centric pointmap stores, at each pixel, the 3D coordinate of that pixel's scene point
-    in the robot frame. The same physical point keeps the same value no matter where the camera is
-    placed. We additionally re-center it at the current end-effector position.
+    in the robot frame. It is computed by a fixed change of coordinates, using the camera intrinsics
+    and a one-time hand-eye calibration, so there is nothing for the policy to learn. The same
+    physical point keeps the same value no matter where the camera is placed. We additionally
+    re-center it at the current end-effector position.
   </p>
   <div class="row2" style="max-width: 920px; margin-left: auto; margin-right: auto;">
     <figure style="margin: 0;">
       <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 420px;">
-      <figcaption>The camera-to-robot transform is a fixed change of coordinates (a one-time hand-eye calibration), not something the policy has to learn.</figcaption>
     </figure>
     <figure style="margin: 0;">
       <img src="static/images/fig10_fusion.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 420px;">
@@ -344,7 +345,7 @@
 <section class="container" id="payoff">
   <h2>With Pointmaps, the Curve Stays Flat</h2>
   <p class="body-text">
-    This is the same study as the top of the page, with one change. The policy now also receives the
+    Back to the study from the top of the page. This time the policy also receives the
     robot-centric pointmap. We jitter RoboCasa's camera poses per demonstration, from <i>No variation</i>
     to <i>High</i> (shown below), and both policies share the same backbone and training recipe.
   </p>
@@ -358,7 +359,7 @@
     <div>
       <div class="stat-line">
         <div class="stat-num good">37.6% &rarr; 35.8%</div>
-        <div class="stat-desc">With the pointmap input, success barely moves under the same growing variation. The margin over RGB-only widens, +3.1 &rarr; +9.0 &rarr; +10.9.</div>
+        <div class="stat-desc">The pointmap policy barely drops under the same camera variation. Its margin over RGB-only grows from +3.1 to +10.9.</div>
       </div>
     </div>
   </div>
@@ -370,9 +371,8 @@
 <section class="container" id="analysis">
   <h2>Three Controlled Studies, One Design</h2>
   <p class="body-text">
-    Why pre-computed robot-frame geometry, image form, and end-effector centering? Each design
-    choice has its own controlled ablation on RoboCasa H50. The backbone and training recipe stay
-    fixed, and only the 3D input changes.
+    Why does the design look the way it does? Each choice is backed by its own controlled ablation
+    on RoboCasa H50. The backbone and training recipe stay fixed, and only the 3D input changes.
   </p>
   <p class="body-text" style="font-size: 14px; color: var(--muted); margin-top: -10px;">
     These studies use a &pi;-style backbone initialized from raw PaliGemma (no robot pretraining),
