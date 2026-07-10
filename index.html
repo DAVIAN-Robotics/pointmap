@@ -271,17 +271,18 @@
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
   <h2>Cameras Move. Actions Don't.</h2>
-  <p class="body-text" style="text-align:center;">
+  <p class="body-text">
     <b>A VLA observes the scene in the camera frame, while its actions are defined in the robot
-    frame.</b> With a fixed camera this frame mismatch stays manageable. A single
+    frame.</b> The policy itself has to bridge this gap, learning how what it sees maps to how it
+    should move. With a fixed camera this mismatch stays manageable. A single
     observation-to-action mapping holds across the whole dataset, and the policy can simply
     memorize it.
   </p>
 
-  <p class="body-text" style="text-align:center;">
+  <p class="body-text">
     But large-scale robot datasets aggregate demonstrations from many labs, each with its own
-    camera setup. Every new camera placement rewrites that mapping, turning it from one the
-    policy can memorize into one it must generalize across viewpoints.
+    camera setup. <b>Every new camera placement rewrites that mapping. Instead of memorizing one
+    fixed mapping, the policy now has to generalize across viewpoints.</b>
   </p>
 
   <div class="evidence-row" style="max-width: 840px; margin-top: 26px;">
@@ -342,11 +343,11 @@
 <!-- =============================== CONTROLLED ANALYSIS =============================== -->
 <section class="container" id="analysis">
   <h2>Four Controlled Studies, One Design</h2>
-  <p class="body-text" style="text-align:center;">
+  <p class="body-text">
     In controlled studies on RoboCasa H50, we hold the backbone and training recipe fixed and change
     only the 3D input. Click each takeaway for the evidence.
   </p>
-  <p class="body-text" style="text-align:center; font-size: 14px; color: var(--muted); margin-top: -10px;">
+  <p class="body-text" style="font-size: 14px; color: var(--muted); margin-top: -10px;">
     These studies use a &pi;-style backbone initialized from raw PaliGemma (no robot pretraining),
     so absolute numbers are lower than the pretrained-VLA results below.
   </p>
@@ -480,7 +481,7 @@
   </div>
 
   <h3 style="text-align:center;">Rollouts: Seen vs. Unseen Camera Placement</h3>
-  <p class="body-text" style="text-align:center; font-size: 15.5px; color: var(--muted);">
+  <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Every clip stacks &pi;<sub>0.5</sub> (top row) over &pi;<sub>0.5</sub> + pointmap (bottom row) at 2&times; speed.
     At the seen placements both policies perform well. At the held-out placement the RGB-only
     policy often fails while the pointmap policy holds.
