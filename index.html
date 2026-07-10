@@ -333,7 +333,7 @@
       <figcaption><b>The transform is a fixed change of coordinates, not learning.</b> RGB-D is lifted into a camera-frame pointmap, then mapped into the robot base frame by the calibrated camera-to-robot matrix (a one-time hand-eye calibration on a real robot). A point's pixel location may shift between views, but its robot-frame value does not.</figcaption>
     </figure>
     <figure style="margin: 0;">
-      <img src="static/images/fig10_fusion_crop.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 440px;">
+      <img src="static/images/fig10_fusion.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 420px;">
       <figcaption><b>One extra tower, one addition.</b> A second SigLIP tower, initialized from the RGB encoder, encodes the pointmap. Its tokens are <b>added element-wise</b> to the matching RGB tokens, and the rest of the VLA stays untouched. Same H&thinsp;&times;&thinsp;W grid, so no point-cloud encoder or extra token sequence.</figcaption>
     </figure>
   </div>
