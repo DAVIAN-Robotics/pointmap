@@ -466,16 +466,20 @@
   </p>
 
   <table class="mini" style="margin: 14px auto 6px;">
-    <thead><tr><th>Method</th><th>Avg. SR</th></tr></thead>
+    <thead><tr><th>Method</th><th>Backbone</th><th>Avg. SR</th></tr></thead>
     <tbody>
-      <tr><td>FP3 (point-cloud policy)</td><td>42.8</td></tr>
-      <tr><td>OC-VLA (camera-aware)</td><td>56.3</td></tr>
-      <tr><td>KYC (camera-aware)</td><td>59.1</td></tr>
-      <tr><td>GeoVLA (3D-augmented)</td><td>57.1</td></tr>
-      <tr><td>PointVLA (3D-augmented)</td><td>57.3</td></tr>
-      <tr class="ours"><td>&pi;<sub>0.5</sub> + Pointmap (ours)</td><td>62.9</td></tr>
+      <tr><td>FP3 (point-cloud policy)</td><td>&ndash;</td><td>42.8</td></tr>
+      <tr><td>OC-VLA (camera-aware)</td><td>&pi;<sub>0.5</sub></td><td>56.3</td></tr>
+      <tr><td>KYC (camera-aware)</td><td>&pi;<sub>0.5</sub></td><td>59.1</td></tr>
+      <tr><td>GeoVLA (3D-augmented)</td><td>&pi;<sub>0.5</sub></td><td>57.1</td></tr>
+      <tr><td>PointVLA (3D-augmented)</td><td>&pi;<sub>0.5</sub></td><td>57.3</td></tr>
+      <tr class="ours"><td>Pointmap (ours)</td><td>&pi;<sub>0.5</sub></td><td>62.9</td></tr>
     </tbody>
   </table>
+  <p class="body-text" style="text-align:center; font-size: 13.5px; color: var(--muted); margin-top: 4px;">
+    All VLA baselines are built on the same &pi;<sub>0.5</sub> backbone as ours. FP3 is a
+    DROID-pretrained point-cloud policy without a VLA backbone.
+  </p>
 
   <details class="takeaway" style="max-width: 860px; margin: 22px auto 0;">
     <summary>Full RoboCasa Results<span class="chev">&#9660;</span></summary>
