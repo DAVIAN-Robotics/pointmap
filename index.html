@@ -466,49 +466,23 @@
   </p>
 
   <table class="mini" style="margin: 14px auto 6px;">
-    <thead><tr><th>Method</th><th>Backbone</th><th>Avg. SR</th></tr></thead>
+    <thead><tr><th>Method</th><th>Category</th><th>Backbone</th><th>Avg. SR</th></tr></thead>
     <tbody>
-      <tr><td>FP3 (point-cloud policy)</td><td>&ndash;</td><td>42.8</td></tr>
-      <tr><td>OC-VLA (camera-aware)</td><td>&pi;<sub>0.5</sub></td><td>56.3</td></tr>
-      <tr><td>KYC (camera-aware)</td><td>&pi;<sub>0.5</sub></td><td>59.1</td></tr>
-      <tr><td>GeoVLA (3D-augmented)</td><td>&pi;<sub>0.5</sub></td><td>57.1</td></tr>
-      <tr><td>PointVLA (3D-augmented)</td><td>&pi;<sub>0.5</sub></td><td>57.3</td></tr>
-      <tr class="ours"><td>Pointmap (ours)</td><td>&pi;<sub>0.5</sub></td><td>62.9</td></tr>
+      <tr><td>FP3</td><td>Point-cloud policy</td><td>&ndash;</td><td>42.8</td></tr>
+      <tr><td>OC-VLA</td><td>Camera-aware VLA</td><td>&pi;<sub>0.5</sub></td><td>56.3</td></tr>
+      <tr><td>KYC</td><td>Camera-aware VLA</td><td>&pi;<sub>0.5</sub></td><td>59.1</td></tr>
+      <tr><td>GeoVLA</td><td>3D-augmented VLA</td><td>&pi;<sub>0.5</sub></td><td>57.1</td></tr>
+      <tr><td>PointVLA</td><td>3D-augmented VLA</td><td>&pi;<sub>0.5</sub></td><td>57.3</td></tr>
+      <tr><td>&pi;<sub>0.5</sub></td><td>RGB-only</td><td>&pi;<sub>0.5</sub></td><td>55.3</td></tr>
+      <tr class="ours"><td>&pi;<sub>0.5</sub> + Pointmap (ours)</td><td>Ours</td><td>&pi;<sub>0.5</sub></td><td>62.9</td></tr>
+      <tr><td>SmolVLA</td><td>RGB-only</td><td>SmolVLA</td><td>37.2</td></tr>
+      <tr class="ours"><td>SmolVLA + Pointmap (ours)</td><td>Ours</td><td>SmolVLA</td><td>41.4</td></tr>
     </tbody>
   </table>
   <p class="body-text" style="text-align:center; font-size: 13.5px; color: var(--muted); margin-top: 4px;">
-    All VLA baselines are built on the same &pi;<sub>0.5</sub> backbone as ours. FP3 is a
-    DROID-pretrained point-cloud policy without a VLA backbone.
+    FP3 is a DROID-pretrained point-cloud policy without a VLA backbone.
+    Per-task-category results are in the paper.
   </p>
-
-  <details class="takeaway" style="max-width: 860px; margin: 22px auto 0;">
-    <summary>Full RoboCasa Results<span class="chev">&#9660;</span></summary>
-    <div class="tk-body" style="padding: 2px 16px 18px;">
-  <div class="table-wrap">
-    <table class="results">
-      <caption>Success rate (%) on RoboCasa H50, fixed evaluation viewpoint, averaged over 24 tasks. Except for FP3, all compared methods use the same &pi;<sub>0.5</sub> backbone.</caption>
-      <thead>
-        <tr><th>Method</th><th>Avg.</th><th>Doors</th><th>Drawers</th><th>Coffee</th><th>Pick-and-place</th><th>Turn objects</th></tr>
-      </thead>
-      <tbody>
-        <tr class="group"><td colspan="7">Point-cloud policy</td></tr>
-        <tr><td>FP3</td><td>42.8</td><td>79.0</td><td>74.0</td><td>54.7</td><td>21.8</td><td>32.0</td></tr>
-        <tr class="group"><td colspan="7">Camera-aware VLAs</td></tr>
-        <tr><td>OC-VLA</td><td>56.3</td><td>80.0</td><td>80.0</td><td>42.0</td><td>50.5</td><td>48.9</td></tr>
-        <tr><td>KYC</td><td>59.1</td><td>86.5</td><td>86.0</td><td>51.3</td><td>48.2</td><td>51.4</td></tr>
-        <tr class="group"><td colspan="7">3D-augmented VLAs</td></tr>
-        <tr><td>GeoVLA</td><td>57.1</td><td>81.0</td><td>80.0</td><td>45.3</td><td>49.8</td><td>50.3</td></tr>
-        <tr><td>PointVLA</td><td>57.3</td><td>87.5</td><td>85.0</td><td>44.0</td><td>46.3</td><td>50.3</td></tr>
-        <tr class="group"><td colspan="7">Ours</td></tr>
-        <tr><td>&pi;<sub>0.5</sub></td><td>55.3</td><td>79.5</td><td>83.0</td><td>40.7</td><td>46.0</td><td>50.6</td></tr>
-        <tr class="ours"><td>&pi;<sub>0.5</sub> + pointmap</td><td class="best">62.9</td><td class="best">90.0</td><td class="best">90.0</td><td class="best">58.0</td><td class="best">52.8</td><td class="best">53.4</td></tr>
-        <tr><td>SmolVLA</td><td>37.2</td><td>68.0</td><td>63.0</td><td>39.3</td><td>6.5</td><td>46.6</td></tr>
-        <tr class="ours"><td>SmolVLA + pointmap</td><td>41.4</td><td>80.0</td><td>77.0</td><td>38.0</td><td>12.8</td><td>43.4</td></tr>
-      </tbody>
-    </table>
-  </div>
-    </div>
-  </details>
 </section>
 
 <hr class="section-divider">
