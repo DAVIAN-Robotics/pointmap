@@ -191,6 +191,7 @@
       text-align: center; letter-spacing: .04em; text-transform: uppercase;
     }
     .vid-tag.unseen { color: var(--accent-dark); }
+    .vid-tag.train { color: #b91c1c; }
 
     /* ---------- BibTeX ---------- */
     .bibtex-box { position: relative; max-width: 860px; margin: 20px auto 0; }
@@ -521,26 +522,26 @@
     </table>
   </div>
 
-  <h3 style="text-align:center;">Rollouts: Seen vs. Unseen Camera Placement</h3>
+  <h3 style="text-align:center;">Rollouts: Train View vs. Test View</h3>
 
   <figure class="framed">
     <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>What Seen and Unseen mean.</b> The policy's external input camera is placed at one of the three <b style="color:#b91c1c;">red</b> positions during training. <b>Seen</b> = the camera stays at a red position. <b>Unseen</b> = the camera moves to the <b style="color:#1e40af;">blue</b> position, which the policy never saw during training. A fixed wrist camera is used in both conditions.</figcaption>
+    <figcaption><b>Camera placements.</b> The external input camera sits at one of the three <b style="color:#b91c1c;">train view</b> positions (red) during training. The <b style="color:#1e40af;">test view</b> position (blue) is never used during training. A fixed wrist camera is used in both conditions. Train view and test view correspond to <i>Seen</i> and <i>Unseen</i> in the table above.</figcaption>
   </figure>
 
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Note: videos are recorded from a fixed observer camera, so the two columns look framed alike.
-    <b>Seen</b> and <b>Unseen</b> refer to the placement of the external input camera, red vs. blue
-    above. Each comparison shows &pi;<sub>0.5</sub> on the top row and &pi;<sub>0.5</sub> + Pointmap
+    What changes is the placement of the external input camera, red vs. blue above.
+    Each comparison shows &pi;<sub>0.5</sub> on the top row and &pi;<sub>0.5</sub> + Pointmap
     on the bottom row at 2&times; speed.
   </p>
 
   <div class="task-block">
     <div class="task-name">Stack blocks</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
+      <div><div class="vid-tag train">Train view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_stack.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
+      <div><div class="vid-tag unseen">Test view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_stack.mp4" type="video/mp4"></video></div>
     </div>
   </div>
@@ -548,9 +549,9 @@
   <div class="task-block">
     <div class="task-name">Pick &amp; place</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
+      <div><div class="vid-tag train">Train view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_pnp.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
+      <div><div class="vid-tag unseen">Test view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4" type="video/mp4"></video></div>
     </div>
   </div>
@@ -558,9 +559,9 @@
   <div class="task-block">
     <div class="task-name">Open drawer</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
+      <div><div class="vid-tag train">Train view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
+      <div><div class="vid-tag unseen">Test view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4" type="video/mp4"></video></div>
     </div>
   </div>
@@ -568,9 +569,9 @@
   <div class="task-block">
     <div class="task-name">Close drawer</div>
     <div class="vid-pair">
-      <div><div class="vid-tag">Seen camera</div>
+      <div><div class="vid-tag train">Train view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Unseen camera</div>
+      <div><div class="vid-tag unseen">Test view</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4" type="video/mp4"></video></div>
     </div>
   </div>
