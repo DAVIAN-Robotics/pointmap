@@ -495,11 +495,11 @@
   </p>
 
   <p class="body-text">
-    Why does the gap widen? At the train views the RGB-only policy holds up, because those exact
-    camera placements were seen during training and the policy can fit each one without working out
-    where the camera actually is. The held-out view exposes this shortcut. RGB-only falls from
-    73.3 to 55.0, while the pointmap policy, whose observations already carry robot-frame geometry,
-    falls far less, from 78.3 to 66.7.
+    The larger gain at the unseen placement is consistent with the pointmap reducing sensitivity
+    to camera viewpoint changes. RGB-only &pi;<sub>0.5</sub> drops from 73.3% to 55.0% when the
+    external camera is moved to a held-out placement, whereas &pi;<sub>0.5</sub> with pointmaps
+    drops from 78.3% to 66.7%. By expressing the observed geometry in the robot frame, pointmaps
+    provide a more consistent spatial input across camera placements.
   </p>
 
   <div class="row2" style="max-width: 720px; margin: 22px auto;">
@@ -534,14 +534,12 @@
 
   <figure class="framed">
     <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>Camera placements.</b> The external input camera sits at one of the three <b style="color:#b91c1c;">train view</b> positions (red) during training. The <b style="color:#1e40af;">test view</b> position (blue) is never used during training. A fixed wrist camera is used in both conditions. Train view and test view correspond to <i>Seen</i> and <i>Unseen</i> in the table above.</figcaption>
+    <figcaption><b>Camera setup.</b> The external camera is placed at three training positions (<b style="color:#b91c1c;">red</b>), while evaluation additionally includes one held-out position (<b style="color:#1e40af;">blue</b>). The wrist camera remains fixed.</figcaption>
   </figure>
 
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    Note: videos are recorded from a fixed observer camera, so the two columns look framed alike.
-    What changes is the placement of the external input camera, red vs. blue above.
-    Each comparison shows &pi;<sub>0.5</sub> on the top row and &pi;<sub>0.5</sub> + Pointmap
-    on the bottom row at 2&times; speed.
+    Note: Videos are recorded from a separate fixed observer camera. The top row shows
+    &pi;<sub>0.5</sub>, and the bottom row shows &pi;<sub>0.5</sub> + Pointmap at 2&times; speed.
   </p>
 
   <div class="task-block">
