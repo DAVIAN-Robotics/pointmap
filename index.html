@@ -181,7 +181,7 @@
     .wide-video { max-width: 900px; margin: 24px auto 0; }
 
     /* per-task rollout gallery */
-    .task-block { max-width: 900px; margin: 30px auto 0; }
+    .task-block { width: min(1120px, 96vw); margin: 34px auto 0; position: relative; left: 50%; transform: translateX(-50%); }
     .task-name { font-weight: 700; font-size: 17px; margin-bottom: 8px; text-align: center; }
     .vid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 700px) { .vid-pair { grid-template-columns: 1fr; } }
@@ -492,6 +492,14 @@
     across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
     <b>held-out (unseen)</b> placement. The pointmap advantage grows from <b>+5.0</b> points at the seen
     camera placement to <b>+11.7</b> points at the unseen placement.
+  </p>
+
+  <p class="body-text">
+    Why does the gap widen? At the train views the RGB-only policy holds up, because those exact
+    camera placements were seen during training and the policy can fit each one without working out
+    where the camera actually is. The held-out view exposes this shortcut. RGB-only falls from
+    73.3 to 55.0, while the pointmap policy, whose observations already carry robot-frame geometry,
+    falls far less, from 78.3 to 66.7.
   </p>
 
   <div class="row2" style="max-width: 720px; margin: 22px auto;">
