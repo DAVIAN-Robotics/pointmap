@@ -504,11 +504,6 @@
     </div>
   </div>
 
-  <figure class="framed">
-    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>Setup.</b> A fixed wrist camera and one external camera placed at three training (red) and one held-out test (blue) positions.</figcaption>
-  </figure>
-
   <div class="table-wrap">
     <table class="results">
       <caption>Real-world success rate (%), 15 rollouts per task per camera condition. DP3 is a from-scratch point-cloud diffusion policy, unlike FP3 in the simulation table (a DROID-pretrained point-cloud foundation policy).</caption>
@@ -527,10 +522,17 @@
   </div>
 
   <h3 style="text-align:center;">Rollouts: Seen vs. Unseen Camera Placement</h3>
+
+  <figure class="framed">
+    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
+    <figcaption><b>What Seen and Unseen mean.</b> The policy's external input camera is placed at one of the three <b style="color:#b91c1c;">red</b> positions during training. <b>Seen</b> = the camera stays at a red position. <b>Unseen</b> = the camera moves to the <b style="color:#1e40af;">blue</b> position, which the policy never saw during training. A fixed wrist camera is used in both conditions.</figcaption>
+  </figure>
+
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    Note: videos are recorded from a fixed observer camera. <b>Seen</b> and <b>Unseen</b> refer to
-    the external camera used as policy input. Each comparison shows &pi;<sub>0.5</sub> on the top row
-    and &pi;<sub>0.5</sub> + Pointmap on the bottom row at 2&times; speed.
+    Note: videos are recorded from a fixed observer camera, so the two columns look framed alike.
+    <b>Seen</b> and <b>Unseen</b> refer to the placement of the external input camera, red vs. blue
+    above. Each comparison shows &pi;<sub>0.5</sub> on the top row and &pi;<sub>0.5</sub> + Pointmap
+    on the bottom row at 2&times; speed.
   </p>
 
   <div class="task-block">
