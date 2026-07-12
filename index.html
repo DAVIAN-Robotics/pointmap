@@ -277,12 +277,17 @@
 
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
-  <h2>Cameras Move. Actions Don't.</h2>
+  <h2>In Robot Data, Cameras Are All Over the Place. Actions Aren't.</h2>
+  <p class="body-text">
+    Large-scale robot datasets aggregate demonstrations from many labs, each with its own camera
+    setup. From one demonstration to the next, the camera viewpoint keeps changing.
+  </p>
+
   <p class="body-text">
     <b>A VLA observes the scene from the camera frame but predicts actions in the robot frame.</b>
     When the camera viewpoint changes, the visual observation changes even though the required
-    robot action is defined in the same robot frame. The policy must therefore handle a different
-    observation-to-action relationship across viewpoints.
+    robot action is defined in the same robot frame, so each camera placement gives the policy a
+    different observation-to-action relationship to learn.
   </p>
 
   <p class="body-text">
