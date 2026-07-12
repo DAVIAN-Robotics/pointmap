@@ -128,7 +128,7 @@
     .tk-body figure { margin: 16px 0 4px; }
     .tk-body .rq-tag { font-size: 13px; font-weight: 600; color: var(--accent-dark); letter-spacing: .03em; }
     table.mini {
-      border-collapse: collapse; font-size: 14.5px; margin: 12px 0 4px;
+      border-collapse: collapse; font-size: 14.5px; margin: 12px auto 4px;
     }
     table.mini th, table.mini td { padding: 5px 14px; text-align: center; border-bottom: 1px solid var(--border); }
     table.mini td:first-child, table.mini th:first-child { text-align: left; }
@@ -192,6 +192,19 @@
     }
     .vid-tag.unseen { color: var(--accent-dark); }
     .vid-tag.train { color: #b91c1c; }
+
+    /* unseen rollout: π0.5 clip stacked above pointmap clip, overlay labels */
+    .roll-cell { position: relative; }
+    .roll-cell video { width: 100%; border-radius: 8px; display: block; }
+    .roll-cell + .roll-cell { margin-top: 8px; }
+    .roll-label {
+      position: absolute; top: 9px; left: 9px; z-index: 2;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+      padding: 3px 11px; border-radius: 999px;
+      background: rgba(255,255,255,.9); border: 1px solid var(--border);
+    }
+    .roll-label.fail { color: #b91c1c; border-color: #fca5a5; }
+    .roll-label.ok { color: #15803d; border-color: #86efac; }
 
     /* training-view grid */
     .train-grid { display: grid; grid-template-columns: 96px repeat(3, 1fr); gap: 8px; align-items: center; }
@@ -295,14 +308,14 @@
       <img src="static/images/droid_viewpoints.png" alt="Third-person camera viewpoints across DROID episodes, visualized as a dense cloud of camera frustums around a Franka arm." style="max-width: 440px;">
     </figure>
     <figure style="margin: 0;">
-      <img src="static/images/oxe_diversity.png" alt="Open X-Embodiment aggregates one million episodes from 311 scenes, 34 research labs, and 22 embodiments." style="max-width: 330px;">
+      <img src="static/images/oxe_observations.png" alt="Camera observations from Open X-Embodiment datasets such as RT-1, Bridge, Cable Routing, and Door Opening, each seen from a very different viewpoint." style="max-width: 400px;">
     </figure>
   </div>
   <figcaption style="max-width: 820px; margin: 0 auto;">
     Left: 1,417 third-person camera viewpoints across DROID episodes (figure from DROID).
-    Right: Open X-Embodiment pools one million episodes from 311 scenes across 21 institutions
-    (figure from Open X-Embodiment). Every lab, and often every episode, mounts the camera
-    somewhere else.
+    Right: what the cameras actually see across Open X-Embodiment datasets such as RT-1 and
+    Bridge (figure from Open X-Embodiment). Every lab, and often every episode, mounts the
+    camera somewhere else.
   </figcaption>
 
   <p class="body-text" style="margin-top: 28px;">
@@ -521,22 +534,43 @@
 
   <h3 style="text-align:center; margin-top: 46px;">Rollouts at the Unseen Placement</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    Note: Videos are recorded from a separate fixed camera. The top row shows
-    &pi;<sub>0.5</sub>, and the bottom row shows &pi;<sub>0.5</sub> + Pointmap at 2&times; speed.
+    Note: Videos are recorded from a separate fixed camera and played at 2&times; speed.
+    For each task, the top clip shows &pi;<sub>0.5</sub> and the bottom clip shows
+    &pi;<sub>0.5</sub> + Pointmap.
   </p>
 
   <div class="task-block">
     <div class="vid-pair">
-      <div><div class="vid-tag unseen">Stack blocks</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_stack.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Pick &amp; place</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4?v=2" type="video/mp4"></video></div>
+      <div>
+        <div class="vid-tag unseen">Stack blocks</div>
+        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_rgb.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_pmp.mp4" type="video/mp4"></video></div>
+      </div>
+      <div>
+        <div class="vid-tag unseen">Pick &amp; place</div>
+        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
-    <div class="vid-pair" style="margin-top: 14px;">
-      <div><div class="vid-tag unseen">Open drawer</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Close drawer</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4?v=2" type="video/mp4"></video></div>
+    <div class="vid-pair" style="margin-top: 18px;">
+      <div>
+        <div class="vid-tag unseen">Open drawer</div>
+        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_rgb.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_pmp.mp4" type="video/mp4"></video></div>
+      </div>
+      <div>
+        <div class="vid-tag unseen">Close drawer</div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_rgb.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_pmp.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
   </div>
 
