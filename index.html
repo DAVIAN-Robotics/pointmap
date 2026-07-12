@@ -98,6 +98,10 @@
       max-width: 820px; margin: 0 auto 6px; font-size: 27px; font-weight: 700;
       text-align: left; color: var(--accent);
     }
+    .sub-head {
+      max-width: 820px; margin: 40px auto 14px; font-size: 21px; font-weight: 700;
+      text-align: left; line-height: 1.45;
+    }
     .sec-claim {
       max-width: 820px; margin: 0 auto 14px; font-size: 19.5px; font-weight: 700;
       text-align: left; line-height: 1.45;
@@ -312,13 +316,7 @@
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
   <h2 class="sec-label">Motivation</h2>
-  <div class="sec-claim">Large-Scale Robot Data Spans Many Camera Viewpoints, but Actions Are Defined in the Robot Frame</div>
-  <p class="body-text">
-    Large-scale robot datasets aggregate demonstrations collected across labs and episodes,
-    often under different camera placements. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
-    third-person viewpoints.
-  </p>
-
+  <div class="sec-claim">Large-Scale Robot Data Spans Many Camera Viewpoints,<br>but Actions Are Defined in the Robot Frame</div>
   <figure style="margin: 24px 0 0;">
     <img src="static/images/droid_viewpoints.png" alt="Third-person camera viewpoint distribution around a Franka robot in DROID." style="max-width: 680px; width: 100%;">
     <figcaption style="text-align: center;">
@@ -326,6 +324,13 @@
       higher viewpoint density. Figure from <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>.
     </figcaption>
   </figure>
+
+  <p class="body-text" style="margin-top: 20px;">
+    Large-scale robot datasets aggregate demonstrations collected across labs and episodes,
+    often under different camera placements. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
+    third-person viewpoints.
+  </p>
+
 
   <p class="body-text" style="margin-top: 28px;">
     Why does this viewpoint variation matter?
@@ -371,12 +376,12 @@
 
   <p class="body-text">
     Rather than asking the policy to learn this viewpoint-dependent mapping, we transform the
-    observation into the robot frame before policy learning. A <b>robot-centric pointmap</b>
+    observation into the robot frame before policy learning. A robot-centric pointmap
     combines two properties:
   </p>
   <ul class="req-list">
-    <li><b>Robot-frame geometry.</b> Each pixel stores a 3D coordinate in the frame where robot actions are defined.</li>
-    <li><b>Image-form structure.</b> The dense H&thinsp;&times;&thinsp;W grid is preserved, allowing the pointmap to use the image-based visual pathway of a pretrained VLA.</li>
+    <li>Robot-frame geometry. Each pixel stores a 3D coordinate in the frame where robot actions are defined.</li>
+    <li>Image-form structure. The dense H&thinsp;&times;&thinsp;W grid is preserved, allowing the pointmap to use the image-based visual pathway of a pretrained VLA.</li>
   </ul>
 
   <figure>
@@ -397,7 +402,7 @@
 
 <!-- =============================== PAYOFF (mirrors the intro study) =============================== -->
 <section class="container" id="payoff">
-  <h2>Pointmaps Remain Stable as Training-Time Viewpoint Variation Increases</h2>
+  <h2 class="sec-label">Results</h2>
   <p class="body-text">
     Adding pointmaps to the same controlled study changes the trend: RGB + Pointmap drops by
     only 1.8 points, compared with 9.6 points for RGB-only.
@@ -421,7 +426,7 @@
 
 <!-- =============================== SIMULATION RESULTS =============================== -->
 <section class="container" id="results">
-  <h2>Pointmaps Improve Both Pretrained VLA Backbones</h2>
+  <h2 class="sub-head">Pointmaps Improve Both Pretrained VLA Backbones</h2>
   <p class="body-text">
     On RoboCasa (24 tasks, 50 human demonstrations each), pointmaps improve both pretrained backbones:
     <b>+7.6</b> points on &pi;<sub>0.5</sub> and <b>+4.2</b> points on SmolVLA.
@@ -461,11 +466,9 @@
   </p>
 </section>
 
-<hr class="section-divider">
-
 <!-- =============================== REAL ROBOT =============================== -->
 <section class="container" id="real-robot">
-  <h2>On a Real Robot, the Gap Widens at an Unseen Camera Placement</h2>
+  <h2 class="sub-head">On a Real Robot, the Gap Widens at an Unseen Camera Placement</h2>
   <p class="body-text">
     We collect demonstrations on a Franka Research 3 while physically repositioning the external camera
     across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
@@ -509,7 +512,7 @@
     </table>
   </div>
 
-  <h3 style="text-align:center;">Trained at Three Camera Placements, Tested at an Unseen One</h3>
+  <h3 style="text-align:center; font-size: 18px;">Trained at Three Camera Placements, Tested at an Unseen One</h3>
 
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     <b>Placement 1 to 3</b> are the three positions where the external camera stood while we
@@ -544,7 +547,7 @@
     </div>
   </div>
 
-  <h3 style="text-align:center; margin-top: 46px;">Rollouts at Unseen Camera Viewpoints</h3>
+  <h3 style="text-align:center; font-size: 18px; margin-top: 46px;">Rollouts at Unseen Camera Viewpoints</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Note: Videos are recorded from a separate fixed camera and played at 2&times; speed.
     For each task, the top clip shows &pi;<sub>0.5</sub> and the bottom clip shows
