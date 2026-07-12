@@ -69,7 +69,7 @@
     }
     figure.framed img { border: 1px solid var(--border); padding: 10px; background: #fff; }
     figcaption {
-      max-width: 820px; margin: 12px auto 0; font-size: 14.5px; color: var(--muted); line-height: 1.55;
+      margin: 12px auto 0; font-size: 14.5px; color: var(--muted); line-height: 1.55;
       text-align: left;
     }
     figcaption b { color: var(--text); }
@@ -80,7 +80,7 @@
     .tagline b { color: var(--accent-dark); }
 
     /* problem-evidence row (intro, CamVLA-style claim + numbers) */
-    .evidence-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: center; max-width: 900px; margin: 30px auto 0; }
+    .evidence-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: center; margin: 30px auto 0; }
     @media (max-width: 760px) { .evidence-row { grid-template-columns: 1fr; } }
     .stat-line { padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
     .stat-line + .stat-line { margin-top: 14px; }
@@ -90,31 +90,31 @@
     .stat-num.ours { color: #2563eb; }
     .stat-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
     .rootcause { text-align: center; font-size: 15.5px; max-width: 780px; margin: 24px auto 0; }
-    ul.req-list { max-width: 860px; margin: 0 auto 16px; padding-left: 26px; }
+    ul.req-list { margin: 0 auto 16px; padding-left: 26px; }
     ul.req-list li { margin: 7px 0; }
 
     /* ---------- Sections ---------- */
     .sec-label {
-      max-width: 820px; margin: 0 auto 6px; font-size: 27px; font-weight: 700;
+      margin: 0 auto 6px; font-size: 27px; font-weight: 700;
       text-align: left; color: var(--accent);
     }
     .sub-head {
-      max-width: 820px; margin: 40px auto 14px; font-size: 21px; font-weight: 700;
+      margin: 40px auto 14px; font-size: 21px; font-weight: 700;
       text-align: left; line-height: 1.45;
     }
     .sec-claim {
-      max-width: 820px; margin: 0 auto 14px; font-size: 19.5px; font-weight: 700;
+      margin: 0 auto 14px; font-size: 19.5px; font-weight: 700;
       text-align: left; line-height: 1.45;
     }
     h2 {
       font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 22px;
     }
     h3 { font-size: 20px; font-weight: 700; margin: 30px 0 10px; }
-    p.body-text { max-width: 820px; margin: 0 auto 16px; }
+    p.body-text { margin: 0 auto 16px; }
     .section-divider { border: none; border-top: 1px solid var(--border); margin: 0 auto; max-width: 960px; }
 
     /* Key takeaways (collapsible) */
-    .takeaways { max-width: 860px; margin: 0 auto; }
+    .takeaways { margin: 0 auto; }
     details.takeaway {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
       margin: 12px 0; overflow: hidden;
@@ -232,7 +232,7 @@
     .tg-empty { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12.5px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 6px; align-self: stretch; }
 
     /* ---------- BibTeX ---------- */
-    .bibtex-box { position: relative; max-width: 860px; margin: 20px auto 0; }
+    .bibtex-box { position: relative; margin: 20px auto 0; }
     pre.bibtex {
       background: #f4f5f7; border: 1px solid var(--border); border-radius: 10px;
       padding: 22px 24px; overflow-x: auto; font-size: 14px; line-height: 1.5;
@@ -313,6 +313,8 @@
   </p>
 </div>
 
+<hr class="section-divider" style="margin-top: 40px;">
+
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
   <h2 class="sec-label">Motivation</h2>
@@ -336,17 +338,21 @@
     Why does this viewpoint variation matter?
     <b>A VLA receives visual observations tied to the camera frame, while the action labels in
     robot datasets are defined in a robot-centric coordinate frame.</b>
-    As the viewpoint changes, the observation is expressed through a different camera frame,
-    requiring the policy to map multiple camera-frame observations to robot-frame actions.
+    As the viewpoint changes, each observation is expressed in a different camera frame, while
+    the action labels remain expressed in the same robot-centric frame. The policy must
+    therefore learn how observations from multiple camera frames map to robot-frame actions.
   </p>
 
   <p class="body-text">
     With a fixed camera, this mapping remains consistent across demonstrations. When the
-    training data spans many viewpoints, however, the policy must generalize it across camera
-    frames, making the mapping harder to learn.
+    training data spans many viewpoints, however, the policy must generalize this mapping
+    across camera frames, making it harder to learn. To test this, we conduct a controlled
+    study on 24 RoboCasa tasks. Using a &pi;-style model initialized from a base PaliGemma
+    checkpoint, we vary only the amount of camera viewpoint randomization across training
+    demonstrations while keeping the remaining training and evaluation settings fixed.
   </p>
 
-  <div class="evidence-row" style="max-width: 880px; margin-top: 24px;">
+  <div class="evidence-row" style="margin-top: 24px;">
     <figure style="margin: 0;">
       <img src="static/images/fig6_rgb_only.png?v=4" alt="RGB-only success decreases from 34.5% to 24.9% as training-time camera viewpoint variation increases.">
     </figure>
@@ -357,9 +363,6 @@
       </div>
     </div>
   </div>
-  <p style="max-width: 880px; margin: 10px auto 0; font-size: 13.5px; color: var(--muted); text-align: center;">
-    Controlled RoboCasa study, without robot pretraining; only camera jitter changes across settings.
-  </p>
 
 </section>
 
@@ -404,7 +407,7 @@
     Adding pointmaps to the same controlled study changes the trend: RGB + Pointmap drops by
     only 1.8 points, compared with 9.6 points for RGB-only.
   </p>
-  <div class="evidence-row" style="max-width: 880px;">
+  <div class="evidence-row">
     <figure style="margin: 0;">
       <img src="static/images/fig6_robustness.png?v=5" alt="On the same axes as the intro chart, RGB + Pointmap decreases from 37.6% to 35.8% while RGB-only decreases from 34.5% to 24.9%.">
     </figure>
