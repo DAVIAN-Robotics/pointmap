@@ -186,6 +186,8 @@
     .vid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 700px) { .vid-pair { grid-template-columns: 1fr; } }
     .vid-pair video { width: 100%; border-radius: 8px; display: block; }
+    .vid-trip { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 800px) { .vid-trip { grid-template-columns: 1fr; } }
     .vid-tag {
       font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px;
       text-align: center; letter-spacing: .04em; text-transform: uppercase;
@@ -541,7 +543,7 @@
 
   <div class="task-block sync-group">
     <div class="vid-tag unseen">Stack blocks</div>
-    <div class="vid-pair">
+    <div class="vid-trip">
       <div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_rgb.mp4" type="video/mp4"></video></div>
@@ -554,12 +556,18 @@
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_pmp2.mp4" type="video/mp4"></video></div>
       </div>
+      <div>
+        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_rgb3.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_pmp3.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
   </div>
 
   <div class="task-block sync-group">
     <div class="vid-tag unseen">Pick &amp; place</div>
-    <div class="vid-pair">
+    <div class="vid-trip">
       <div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb.mp4" type="video/mp4"></video></div>
@@ -572,12 +580,18 @@
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp2.mp4" type="video/mp4"></video></div>
       </div>
+      <div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb3.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp3.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
   </div>
 
   <div class="task-block sync-group">
     <div class="vid-tag unseen">Open drawer</div>
-    <div class="vid-pair">
+    <div class="vid-trip">
       <div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_rgb.mp4" type="video/mp4"></video></div>
@@ -590,16 +604,30 @@
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_pmp2.mp4" type="video/mp4"></video></div>
       </div>
+      <div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_rgb3.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_pmp3.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
   </div>
 
-  <div class="task-block sync-group" style="max-width: 620px;">
+  <div class="task-block sync-group">
     <div class="vid-tag unseen">Close drawer</div>
-    <div>
-      <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
-        <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_rgb.mp4" type="video/mp4"></video></div>
-      <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
-        <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_pmp.mp4" type="video/mp4"></video></div>
+    <div class="vid-pair">
+      <div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_rgb.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_pmp.mp4" type="video/mp4"></video></div>
+      </div>
+      <div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_rgb2.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_pmp2.mp4" type="video/mp4"></video></div>
+      </div>
     </div>
   </div>
 
