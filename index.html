@@ -94,6 +94,10 @@
     ul.req-list li { margin: 7px 0; }
 
     /* ---------- Sections ---------- */
+    .kicker {
+      text-align: center; font-size: 15px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    }
     h2 {
       font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 22px;
     }
@@ -302,10 +306,11 @@
 
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
+  <div class="kicker">Motivation</div>
   <h2 style="max-width: 860px; margin-left: auto; margin-right: auto; text-wrap: balance;">Large-Scale Robot Data Spans Many Camera&nbsp;Viewpoints, but Actions Are Defined in the Robot&nbsp;Frame</h2>
   <p class="body-text">
     Large-scale robot datasets aggregate demonstrations collected across labs and episodes,
-    often under different camera placements. DROID, for example, contains 1,417 unique
+    often under different camera placements. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
     third-person viewpoints.
   </p>
 
@@ -313,21 +318,22 @@
     <img src="static/images/droid_viewpoints.png" alt="Third-person camera viewpoint distribution around a Franka robot in DROID." style="max-width: 680px; width: 100%;">
     <figcaption style="text-align: center;">
       Third-person camera viewpoints in DROID (subsampled); brighter colors indicate regions of
-      higher viewpoint density. Figure from DROID.
+      higher viewpoint density. Figure from <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>.
     </figcaption>
   </figure>
 
   <p class="body-text" style="margin-top: 28px;">
-    <b>A VLA observes the scene in the camera frame but predicts actions in the robot frame.</b>
-    As the viewpoint changes, the same scene is projected differently into the image, while
-    actions remain expressed in robot coordinates. The policy must therefore learn a
-    viewpoint-dependent observation-to-action mapping.
+    Why does this viewpoint variation matter?
+    <b>A VLA receives visual observations tied to the camera frame, while the action labels in
+    robot datasets are defined in a robot-centric coordinate frame.</b>
+    As the viewpoint changes, the observation is expressed through a different camera frame,
+    requiring the policy to map multiple camera-frame observations to robot-frame actions.
   </p>
 
   <p class="body-text">
-    With a fixed camera, the mapping from image observations to robot-frame actions remains
-    consistent. With viewpoint-diverse training data, the policy must generalize that mapping
-    across views.
+    With a fixed camera, this mapping remains consistent across demonstrations. When the
+    training data spans many viewpoints, however, the policy must generalize it across camera
+    frames, making the mapping harder to learn.
   </p>
 
   <div class="evidence-row" style="max-width: 880px; margin-top: 24px;">
@@ -351,7 +357,8 @@
 
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
-  <h2>3D in the Robot Frame, Shaped like an RGB Image</h2>
+  <div class="kicker">Solution</div>
+  <h2>Robot-Centric Pointmaps Reduce the Frame Mismatch</h2>
 
   <p class="body-text">
     Rather than asking the policy to learn this viewpoint-dependent mapping, we transform the
