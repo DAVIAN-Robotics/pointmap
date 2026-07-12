@@ -541,14 +541,14 @@
 
   <div class="task-block">
     <div class="vid-pair">
-      <div>
+      <div class="sync-group">
         <div class="vid-tag unseen">Stack blocks</div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_rgb.mp4" type="video/mp4"></video></div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_stack_pmp.mp4" type="video/mp4"></video></div>
       </div>
-      <div>
+      <div class="sync-group">
         <div class="vid-tag unseen">Pick &amp; place</div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb.mp4" type="video/mp4"></video></div>
@@ -557,14 +557,14 @@
       </div>
     </div>
     <div class="vid-pair" style="margin-top: 18px;">
-      <div>
+      <div class="sync-group">
         <div class="vid-tag unseen">Open drawer</div>
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_rgb.mp4" type="video/mp4"></video></div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_open_pmp.mp4" type="video/mp4"></video></div>
       </div>
-      <div>
+      <div class="sync-group">
         <div class="vid-tag unseen">Close drawer</div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
           <video autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_close_rgb.mp4" type="video/mp4"></video></div>
@@ -679,6 +679,30 @@ function copyBibtex(btn) {
     setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
   });
 }
+
+// Rollout pairs: each clip holds its last frame until every clip in the
+// same task group has finished, then all restart together.
+document.querySelectorAll('.sync-group').forEach((group) => {
+  const vids = Array.from(group.querySelectorAll('video'));
+  if (vids.length < 2) return;
+  const restartAll = () => vids.forEach((x) => { x.currentTime = 0; x.play(); });
+  const done = new Set();
+  vids.forEach((v) => {
+    v.removeAttribute('loop');
+    v.addEventListener('ended', () => {
+      done.add(v);
+      if (done.size === vids.length) { done.clear(); restartAll(); }
+    });
+  });
+  // start the first cycle together as well (or after 3 s if a clip is slow to load)
+  vids.forEach((v) => v.pause());
+  let started = false;
+  const startAll = () => { if (!started) { started = true; restartAll(); } };
+  const check = () => { if (vids.every((v) => v.readyState >= 3)) startAll(); };
+  vids.forEach((v) => v.addEventListener('canplaythrough', check));
+  setTimeout(startAll, 3000);
+  check();
+});
 </script>
 
 </body>
