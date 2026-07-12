@@ -94,9 +94,13 @@
     ul.req-list li { margin: 7px 0; }
 
     /* ---------- Sections ---------- */
-    .kicker {
-      text-align: center; font-size: 15px; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    .sec-label {
+      max-width: 820px; margin: 0 auto 20px; font-size: 30px; font-weight: 700;
+      text-align: left; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .sec-claim {
+      max-width: 820px; margin: 0 auto 16px; font-size: 20.5px; font-weight: 700;
+      text-align: left; line-height: 1.45;
     }
     h2 {
       font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 22px;
@@ -306,8 +310,8 @@
 
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
-  <div class="kicker">Motivation</div>
-  <h2 style="max-width: 860px; margin-left: auto; margin-right: auto; text-wrap: balance;">Large-Scale Robot Data Spans Many Camera&nbsp;Viewpoints, but Actions Are Defined in the Robot&nbsp;Frame</h2>
+  <h2 class="sec-label">Motivation</h2>
+  <div class="sec-claim">Large-Scale Robot Data Spans Many Camera Viewpoints, but Actions Are Defined in the Robot Frame</div>
   <p class="body-text">
     Large-scale robot datasets aggregate demonstrations collected across labs and episodes,
     often under different camera placements. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
@@ -357,8 +361,8 @@
 
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
-  <div class="kicker">Solution</div>
-  <h2>Robot-Centric Pointmaps Reduce the Frame Mismatch</h2>
+  <h2 class="sec-label">Solution</h2>
+  <div class="sec-claim">Robot-Centric Pointmaps Reduce the Frame Mismatch</div>
 
   <p class="body-text">
     Rather than asking the policy to learn this viewpoint-dependent mapping, we transform the
