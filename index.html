@@ -499,14 +499,12 @@
 
   <h3 style="text-align:center;">Trained at Three Camera Placements, Tested at an Unseen One</h3>
 
-  <figure class="framed">
-    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>Camera setup.</b> The external camera is placed at three training positions (<b style="color:#b91c1c;">red</b>), while evaluation additionally includes one held-out position (<b style="color:#1e40af;">blue</b>). The wrist camera remains fixed.</figcaption>
-  </figure>
-
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    Below, one training demonstration per placement, seen from the policy's external input camera
-    (clips at 2&times; speed). The same tasks look very different depending on where the camera stands.
+    <b>Placement 1 to 3</b> are the three positions where the external camera stood while we
+    collected demonstrations. The wrist camera stays fixed. Below, one training demonstration per
+    placement, seen from the policy's external input camera (clips at 2&times; speed). The same
+    tasks look very different depending on where the camera stands. Evaluation additionally uses a
+    held-out camera position that never appears in training.
   </p>
 
   <div class="task-block">
@@ -534,7 +532,7 @@
     </div>
   </div>
 
-  <h3 style="text-align:center; margin-top: 46px;">Rollouts at the Unseen Placement</h3>
+  <h3 style="text-align:center; margin-top: 46px;">Rollouts at Unseen Camera Viewpoints</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Note: Videos are recorded from a separate fixed camera and played at 2&times; speed.
     For each task, the top clip shows &pi;<sub>0.5</sub> and the bottom clip shows
