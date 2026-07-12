@@ -193,6 +193,13 @@
     .vid-tag.unseen { color: var(--accent-dark); }
     .vid-tag.train { color: #b91c1c; }
 
+    /* training-view grid */
+    .train-grid { display: grid; grid-template-columns: 96px repeat(3, 1fr); gap: 8px; align-items: center; }
+    .train-grid img { width: 100%; border-radius: 6px; display: block; }
+    .tg-head { text-align: center; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #b91c1c; }
+    .tg-label { font-size: 13.5px; font-weight: 600; color: var(--muted); text-align: right; padding-right: 4px; line-height: 1.3; }
+    .tg-empty { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12.5px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 6px; align-self: stretch; }
+
     /* ---------- BibTeX ---------- */
     .bibtex-box { position: relative; max-width: 860px; margin: 20px auto 0; }
     pre.bibtex {
@@ -283,7 +290,21 @@
     setup. From one demonstration to the next, the camera viewpoint keeps changing.
   </p>
 
-  <p class="body-text">
+  <div class="row2" style="max-width: 880px; margin: 24px auto; align-items: end;">
+    <figure style="margin: 0;">
+      <img src="static/images/droid_viewpoints.png" alt="Third-person camera viewpoints across DROID episodes, visualized as a dense cloud of camera frustums around a Franka arm." style="max-width: 400px;">
+    </figure>
+    <figure style="margin: 0;">
+      <img src="static/images/kyc_camera_poses.png" alt="Camera poses used in Know Your Camera, hundreds of frustums surrounding a UR arm." style="max-width: 360px;">
+    </figure>
+  </div>
+  <figcaption style="max-width: 820px; margin: 0 auto;">
+    Camera viewpoints in real robot data. Left: 1,417 third-person camera viewpoints across DROID
+    episodes (figure from the DROID dataset). Right: camera poses in KYC (figure from Know Your
+    Camera). Every lab, and often every episode, mounts the camera somewhere else.
+  </figcaption>
+
+  <p class="body-text" style="margin-top: 28px;">
     <b>A VLA observes the scene from the camera frame but predicts actions in the robot frame.</b>
     When the camera viewpoint changes, the visual observation changes even though the required
     robot action is defined in the same robot frame, so each camera placement gives the policy a
@@ -332,15 +353,10 @@
     A robot-centric pointmap stores robot-frame XYZ coordinates at the corresponding image pixels,
     preserving the same dense H&thinsp;&times;&thinsp;W grid as RGB.
   </p>
-  <div class="row2" style="max-width: 920px; margin-left: auto; margin-right: auto;">
-    <figure style="margin: 0;">
-      <img src="static/images/fig3_pipeline.png" alt="RGB-D observations are lifted into camera-frame pointmaps and transformed into robot-frame pointmaps." style="max-width: 420px;">
-    </figure>
-    <figure style="margin: 0;">
-      <img src="static/images/fig10_fusion.png" alt="A second SigLIP tower encodes the pointmap and its tokens are added element-wise to the RGB tokens before entering the VLA." style="max-width: 420px;">
-      <figcaption>Because RGB and pointmap share the same image grid, their spatially corresponding tokens can be fused element-wise before entering the VLA. The pointmap is encoded with a separate image encoder initialized from the RGB encoder.</figcaption>
-    </figure>
-  </div>
+  <figure class="framed">
+    <img src="static/images/fig10_architecture.png" alt="Full model architecture: each RGB-D observation becomes a robot-centric pointmap, encoded by a second image encoder and added element-wise to the RGB tokens.">
+    <figcaption><b>Full architecture.</b> Each camera's pointmap is encoded by a second image encoder, initialized from the RGB encoder, and added element-wise to the RGB tokens right next to it. Nothing else in the VLA changes. That is the whole method.</figcaption>
+  </figure>
 </section>
 
 <hr class="section-divider">
@@ -371,77 +387,7 @@
   </div>
 </section>
 
-<hr class="section-divider">
 
-<!-- =============================== CONTROLLED ANALYSIS =============================== -->
-<section class="container" id="analysis">
-  <h2>Three Controlled Studies, One Design</h2>
-  <p class="body-text">
-    Why does the design look the way it does? Each choice is backed by its own controlled ablation
-    on RoboCasa H50. The backbone and training recipe stay fixed, and only the 3D input changes.
-  </p>
-  <p class="body-text" style="font-size: 14px; color: var(--muted); margin-top: -10px;">
-    For these controlled studies, we use a model without robot pretraining to isolate the effect of
-    each input design. Its success rates are therefore lower than those of the pretrained VLAs
-    evaluated later.
-  </p>
-
-  <div class="takeaways">
-    <details class="takeaway">
-      <summary><span class="tk-num">1</span>Pre-compute Robot-Frame Geometry<span class="chev">&#9660;</span></summary>
-      <div class="tk-body">
-        <p style="margin-top:8px;">Pl&uuml;cker rays describe the camera geometry, and depth provides per-pixel distance. RGB + Pl&uuml;cker + Depth therefore contains the information needed to obtain robot-frame geometry, but leaves it for the policy to infer. Providing robot-frame geometry directly as a pointmap improves success from <b>31.6% to 34.7%</b>.</p>
-        <table class="mini">
-          <thead><tr><th>Input</th><th>Robot-frame geometry</th><th>SR</th></tr></thead>
-          <tbody>
-            <tr><td>RGB</td><td>not provided</td><td>27.9</td></tr>
-            <tr><td>RGB + Pl&uuml;cker</td><td>not provided</td><td>28.7</td></tr>
-            <tr><td>RGB + Pl&uuml;cker + Depth</td><td>left to the policy</td><td>31.6</td></tr>
-            <tr class="ours"><td>RGB + Pointmap</td><td>provided directly</td><td>34.7</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </details>
-
-    <details class="takeaway">
-      <summary><span class="tk-num">2</span>Preserve the Image Grid<span class="chev">&#9660;</span></summary>
-      <div class="tk-body">
-        <p style="margin-top:8px;">Pointmaps outperform point-cloud inputs while preserving the dense image grid used by the VLA. Because RGB and pointmap tokens share the same spatial layout, element-wise addition further improves success from <b>30.7% to 34.7%</b>.</p>
-        <table class="mini">
-          <thead><tr><th>3D input</th><th>Encoder</th><th>Fusion</th><th>SR</th></tr></thead>
-          <tbody>
-            <tr><td>None</td><td>&ndash;</td><td>&ndash;</td><td>27.9</td></tr>
-            <tr><td>Point cloud</td><td>MLP</td><td>concat</td><td>24.2</td></tr>
-            <tr><td>Point cloud</td><td>PTv3</td><td>concat</td><td>32.8</td></tr>
-            <tr><td>Pointmap</td><td>image encoder</td><td>concat</td><td>30.7</td></tr>
-            <tr class="ours"><td>Pointmap</td><td>image encoder</td><td>add</td><td>34.7</td></tr>
-          </tbody>
-        </table>
-        <figure>
-          <img src="static/images/fig5_fusion.png" alt="Element-wise addition preserves spatial correspondence; concatenation treats pointmap tokens as a separate sequence." style="max-width: 540px;">
-        </figure>
-      </div>
-    </details>
-
-    <details class="takeaway">
-      <summary><span class="tk-num">3</span>Center Geometry at the End Effector<span class="chev">&#9660;</span></summary>
-      <div class="tk-body">
-        <p style="margin-top:8px;">Centering the pointmap at the current end-effector position reduces variation caused by absolute workspace location, making similar interactions appear in a more consistent local coordinate system. It improves success under both fixed and randomized evaluation viewpoints.</p>
-        <table class="mini">
-          <thead><tr><th>Pointmap origin</th><th>Fixed eval.</th><th>Randomized eval.</th><th>Drop</th></tr></thead>
-          <tbody>
-            <tr><td>Robot base</td><td>34.7</td><td>32.7</td><td>&minus;2.0</td></tr>
-            <tr class="ours"><td>End effector</td><td>36.9</td><td>36.6</td><td>&minus;0.3</td></tr>
-          </tbody>
-        </table>
-        <figure>
-          <img src="static/images/fig4_ee_centering.png" alt="End-effector centering concentrates interaction targets near a common origin.">
-        </figure>
-      </div>
-    </details>
-
-  </div>
-</section>
 
 <hr class="section-divider">
 
@@ -535,7 +481,7 @@
     </table>
   </div>
 
-  <h3 style="text-align:center;">Rollouts: Train View vs. Test View</h3>
+  <h3 style="text-align:center;">Trained at Three Camera Placements, Tested at an Unseen One</h3>
 
   <figure class="framed">
     <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
@@ -543,48 +489,127 @@
   </figure>
 
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
+    Below, one training demonstration per placement, seen from the policy's external input camera.
+    The same tasks look very different depending on where the camera stands.
+  </p>
+
+  <div class="task-block">
+    <div class="train-grid">
+      <div></div>
+      <div class="tg-head">Placement 1</div>
+      <div class="tg-head">Placement 2</div>
+      <div class="tg-head">Placement 3</div>
+      <div class="tg-label">Stack blocks</div>
+      <img src="static/images/train_views/train_stack_cfg1.jpg" alt="Stack blocks demo seen from placement 1">
+      <img src="static/images/train_views/train_stack_cfg2.jpg" alt="Stack blocks demo seen from placement 2">
+      <img src="static/images/train_views/train_stack_cfg3.jpg" alt="Stack blocks demo seen from placement 3">
+      <div class="tg-label">Pick &amp; place</div>
+      <img src="static/images/train_views/train_pnp_cfg1.jpg" alt="Pick and place demo seen from placement 1">
+      <img src="static/images/train_views/train_pnp_cfg2.jpg" alt="Pick and place demo seen from placement 2">
+      <img src="static/images/train_views/train_pnp_cfg3.jpg" alt="Pick and place demo seen from placement 3">
+      <div class="tg-label">Open drawer</div>
+      <img src="static/images/train_views/train_open_cfg1.jpg" alt="Open drawer demo seen from placement 1">
+      <div class="tg-empty">no drawer demos<br>at this placement</div>
+      <img src="static/images/train_views/train_open_cfg3.jpg" alt="Open drawer demo seen from placement 3">
+      <div class="tg-label">Close drawer</div>
+      <img src="static/images/train_views/train_close_cfg1.jpg" alt="Close drawer demo seen from placement 1">
+      <div class="tg-empty">no drawer demos<br>at this placement</div>
+      <img src="static/images/train_views/train_close_cfg3.jpg" alt="Close drawer demo seen from placement 3">
+    </div>
+  </div>
+
+  <h3 style="text-align:center; margin-top: 46px;">Rollouts at the Unseen Placement</h3>
+  <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Note: Videos are recorded from a separate fixed camera. The top row shows
     &pi;<sub>0.5</sub>, and the bottom row shows &pi;<sub>0.5</sub> + Pointmap at 2&times; speed.
   </p>
 
   <div class="task-block">
-    <div class="task-name">Stack blocks</div>
     <div class="vid-pair">
-      <div><div class="vid-tag train">Train view</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_stack.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Test view</div>
+      <div><div class="vid-tag unseen">Stack blocks</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_stack.mp4?v=2" type="video/mp4"></video></div>
-    </div>
-  </div>
-
-  <div class="task-block">
-    <div class="task-name">Pick &amp; place</div>
-    <div class="vid-pair">
-      <div><div class="vid-tag train">Train view</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_pnp.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Test view</div>
+      <div><div class="vid-tag unseen">Pick &amp; place</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_pnp.mp4?v=2" type="video/mp4"></video></div>
     </div>
-  </div>
-
-  <div class="task-block">
-    <div class="task-name">Open drawer</div>
-    <div class="vid-pair">
-      <div><div class="vid-tag train">Train view</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_open.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Test view</div>
+    <div class="vid-pair" style="margin-top: 14px;">
+      <div><div class="vid-tag unseen">Open drawer</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_open.mp4?v=2" type="video/mp4"></video></div>
-    </div>
-  </div>
-
-  <div class="task-block">
-    <div class="task-name">Close drawer</div>
-    <div class="vid-pair">
-      <div><div class="vid-tag train">Train view</div>
-        <video autoplay muted loop playsinline controls><source src="static/videos/trained_close.mp4?v=2" type="video/mp4"></video></div>
-      <div><div class="vid-tag unseen">Test view</div>
+      <div><div class="vid-tag unseen">Close drawer</div>
         <video autoplay muted loop playsinline controls><source src="static/videos/unseen_close.mp4?v=2" type="video/mp4"></video></div>
     </div>
+  </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- =============================== CONTROLLED ANALYSIS =============================== -->
+<section class="container" id="analysis">
+  <h2>Three Controlled Studies, One Design</h2>
+  <p class="body-text">
+    Why does the design look the way it does? Each choice is backed by its own controlled ablation
+    on RoboCasa H50. The backbone and training recipe stay fixed, and only the 3D input changes.
+  </p>
+  <p class="body-text" style="font-size: 14px; color: var(--muted); margin-top: -10px;">
+    For these controlled studies, we use a model without robot pretraining to isolate the effect of
+    each input design. Its success rates are therefore lower than those of the pretrained VLAs
+    evaluated later.
+  </p>
+
+  <div class="takeaways">
+    <details class="takeaway">
+      <summary><span class="tk-num">1</span>Pre-compute Robot-Frame Geometry<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <p style="margin-top:8px;">Pl&uuml;cker rays describe the camera geometry, and depth provides per-pixel distance. RGB + Pl&uuml;cker + Depth therefore contains the information needed to obtain robot-frame geometry, but leaves it for the policy to infer. Providing robot-frame geometry directly as a pointmap improves success from <b>31.6% to 34.7%</b>.</p>
+        <table class="mini">
+          <thead><tr><th>Input</th><th>Robot-frame geometry</th><th>SR</th></tr></thead>
+          <tbody>
+            <tr><td>RGB</td><td>not provided</td><td>27.9</td></tr>
+            <tr><td>RGB + Pl&uuml;cker</td><td>not provided</td><td>28.7</td></tr>
+            <tr><td>RGB + Pl&uuml;cker + Depth</td><td>left to the policy</td><td>31.6</td></tr>
+            <tr class="ours"><td>RGB + Pointmap</td><td>provided directly</td><td>34.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="takeaway">
+      <summary><span class="tk-num">2</span>Preserve the Image Grid<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <p style="margin-top:8px;">Pointmaps outperform point-cloud inputs while preserving the dense image grid used by the VLA. Because RGB and pointmap tokens share the same spatial layout, element-wise addition further improves success from <b>30.7% to 34.7%</b>.</p>
+        <table class="mini">
+          <thead><tr><th>3D input</th><th>Encoder</th><th>Fusion</th><th>SR</th></tr></thead>
+          <tbody>
+            <tr><td>None</td><td>&ndash;</td><td>&ndash;</td><td>27.9</td></tr>
+            <tr><td>Point cloud</td><td>MLP</td><td>concat</td><td>24.2</td></tr>
+            <tr><td>Point cloud</td><td>PTv3</td><td>concat</td><td>32.8</td></tr>
+            <tr><td>Pointmap</td><td>image encoder</td><td>concat</td><td>30.7</td></tr>
+            <tr class="ours"><td>Pointmap</td><td>image encoder</td><td>add</td><td>34.7</td></tr>
+          </tbody>
+        </table>
+        <figure>
+          <img src="static/images/fig5_fusion.png" alt="Element-wise addition preserves spatial correspondence; concatenation treats pointmap tokens as a separate sequence." style="max-width: 540px;">
+        </figure>
+      </div>
+    </details>
+
+    <details class="takeaway">
+      <summary><span class="tk-num">3</span>Center Geometry at the End Effector<span class="chev">&#9660;</span></summary>
+      <div class="tk-body">
+        <p style="margin-top:8px;">Centering the pointmap at the current end-effector position reduces variation caused by absolute workspace location, making similar interactions appear in a more consistent local coordinate system. It improves success under both fixed and randomized evaluation viewpoints.</p>
+        <table class="mini">
+          <thead><tr><th>Pointmap origin</th><th>Fixed eval.</th><th>Randomized eval.</th><th>Drop</th></tr></thead>
+          <tbody>
+            <tr><td>Robot base</td><td>34.7</td><td>32.7</td><td>&minus;2.0</td></tr>
+            <tr class="ours"><td>End effector</td><td>36.9</td><td>36.6</td><td>&minus;0.3</td></tr>
+          </tbody>
+        </table>
+        <figure>
+          <img src="static/images/fig4_ee_centering.png" alt="End-effector centering concentrates interaction targets near a common origin.">
+        </figure>
+      </div>
+    </details>
+
   </div>
 </section>
 
