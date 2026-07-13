@@ -276,13 +276,13 @@
   <h1 class="title">See like a Robot: <span class="subtitle-break">Robot-Centric Pointmaps for Vision-Language-Action Models</span></h1>
 
   <p class="authors">
-    <!-- TODO: 개인 홈페이지 링크로 교체 (없는 사람은 <a> 제거) -->
-    <a href="#">Byungkun Lee</a><sup>1*</sup>,
-    <a href="#">Dongyoon Hwang</a><sup>1*</sup>,
-    <a href="#">Dongjin Kim</a><sup>1</sup>,
-    <a href="#">Hojoon Lee</a><sup>2</sup>,
-    <a href="#">Minho Park</a><sup>1</sup>,
-    <a href="#">Jaegul Choo</a><sup>1</sup>
+    <!-- Dongjin Kim: 개인 홈페이지 확인되면 <a> 추가 -->
+    <a href="https://lee15253.github.io/">Byungkun Lee</a><sup>1*</sup>,
+    <a href="https://godnpeter.github.io/">Dongyoon Hwang</a><sup>1*</sup>,
+    <span>Dongjin Kim</span><sup>1</sup>,
+    <a href="https://joonleesky.github.io/">Hojoon Lee</a><sup>2</sup>,
+    <a href="https://pmh9960.github.io/">Minho Park</a><sup>1</sup>,
+    <a href="https://sites.google.com/site/jaegulchoo/">Jaegul Choo</a><sup>1</sup>
   </p>
   <p class="affil"><sup>1</sup>KAIST AI&emsp;<sup>2</sup>Holiday Robotics</p>
   <p class="eqnote"><sup>*</sup>Equal contribution</p>
@@ -408,7 +408,7 @@
     The whole method: one extra encoder and one element-wise addition.
   </p>
   <figure class="framed">
-    <img src="static/images/fig10_architecture.png" alt="Full model architecture: each RGB-D observation becomes a robot-centric pointmap, encoded by a second image encoder and added element-wise to the RGB tokens.">
+    <img src="static/images/fig10_architecture.png?v=2" alt="Full model architecture: each RGB-D observation becomes a robot-centric pointmap, encoded by a second image encoder and added element-wise to the RGB tokens.">
     <figcaption><b>Full architecture.</b> Each camera's pointmap is encoded by a second image encoder, initialized from the RGB encoder, and added element-wise to the RGB tokens right next to it. Nothing else in the VLA changes.</figcaption>
   </figure>
 </section>
@@ -588,16 +588,16 @@
       <div class="train-grid roll-compact" style="grid-template-columns: repeat(3, 1fr);">
         <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
           <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb.mp4" type="video/mp4"></video></div>
-        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
-          <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb2.mp4" type="video/mp4"></video></div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> &#10003;</span>
           <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb3.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label fail">&pi;<sub>0.5</sub> &#10007;</span>
+          <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_rgb2.mp4" type="video/mp4"></video></div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp.mp4" type="video/mp4"></video></div>
         <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
-          <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp2.mp4?v=2" type="video/mp4"></video></div>
-        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
           <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp3.mp4" type="video/mp4"></video></div>
+        <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
+          <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp2.mp4?v=2" type="video/mp4"></video></div>
       </div>
     </div>
   </div>
