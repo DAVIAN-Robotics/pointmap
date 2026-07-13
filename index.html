@@ -408,9 +408,12 @@
     A robot-centric pointmap stores robot-frame XYZ coordinates at the corresponding image pixels,
     preserving the same dense H&thinsp;&times;&thinsp;W grid as RGB.
   </p>
+  <p class="body-text" style="font-family: 'Google Sans', 'Noto Sans', sans-serif; font-size: 21px; font-weight: 700; margin-top: 30px;">
+    The whole method: one extra encoder and one element-wise add.
+  </p>
   <figure class="framed">
     <img src="static/images/fig10_architecture.png" alt="Full model architecture: each RGB-D observation becomes a robot-centric pointmap, encoded by a second image encoder and added element-wise to the RGB tokens.">
-    <figcaption><b>Full architecture.</b> Each camera's pointmap is encoded by a second image encoder, initialized from the RGB encoder, and added element-wise to the RGB tokens right next to it. Nothing else in the VLA changes. That is the whole method.</figcaption>
+    <figcaption><b>Full architecture.</b> Each camera's pointmap is encoded by a second image encoder, initialized from the RGB encoder, and added element-wise to the RGB tokens right next to it. Nothing else in the VLA changes.</figcaption>
   </figure>
 </section>
 
