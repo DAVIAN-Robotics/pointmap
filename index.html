@@ -330,7 +330,7 @@
 
   <p class="body-text" style="margin-top: 20px;">
     Large-scale robot datasets aggregate demonstrations collected across labs and episodes,
-    often under different camera placements. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
+    often from different camera viewpoints. <a href="https://droid-dataset.github.io/" target="_blank" rel="noopener">DROID</a>, for example, contains 1,417 unique
     third-person viewpoints.
   </p>
 
@@ -378,7 +378,7 @@
   <p class="body-text">
     Rather than asking the policy to learn how each camera frame maps to robot-frame actions,
     we express the observed 3D geometry from different viewpoints in a shared robot frame.
-    This gives the policy a consistent geometric coordinate system across camera viewpoints.
+    This gives the policy a consistent geometric coordinate system across diverse camera viewpoints.
     <b>Robot-centric pointmaps bridge this frame mismatch while preserving the image-form
     representation used by pretrained VLAs.</b>
   </p>
@@ -436,7 +436,7 @@
     <b>+7.6</b> points on &pi;<sub>0.5</sub> and <b>+4.2</b> points on SmolVLA.
   </p>
 
-  <div class="row2" style="max-width: 720px; margin: 22px auto;">
+  <div class="row2" style="max-width: 720px; margin: 22px auto; align-items: stretch;">
     <div class="stat-line">
       <div class="stat-num good">55.3 &rarr; 62.9</div>
       <div class="stat-desc">&pi;<sub>0.5</sub> average success with pointmaps (+7.6).</div>
@@ -472,38 +472,84 @@
 
 <!-- =============================== REAL ROBOT =============================== -->
 <section class="container" id="real-robot">
-  <h2 class="sub-head">On a Real Robot, the Gap Widens at an Unseen Camera Placement</h2>
+  <h2 class="sub-head">On a Real Robot, the Gap Widens at an Unseen Camera Viewpoint</h2>
   <p class="body-text">
-    We collect demonstrations on a Franka Research 3 while physically repositioning the external camera
-    across three placements (180 demos over 4 tasks), then evaluate at a <b>seen</b> placement and at a
-    <b>held-out (unseen)</b> placement. The pointmap advantage grows from <b>+5.0</b> points at the seen
-    camera placement to <b>+11.7</b> points at the unseen placement.
+    We collect 180 demonstrations over four tasks on a Franka Research 3 while repositioning the
+    external camera across three training viewpoints. We then evaluate the policies at one seen
+    viewpoint and at a held-out viewpoint not observed during training.
   </p>
 
-  <p class="body-text">
-    The larger gain at the unseen placement is consistent with the pointmap reducing sensitivity
-    to camera viewpoint changes. RGB-only &pi;<sub>0.5</sub> drops from 73.3% to 55.0% when the
-    external camera is moved to a held-out placement, whereas &pi;<sub>0.5</sub> with pointmaps
-    drops from 78.3% to 66.7%. By expressing the observed geometry in the robot frame, pointmaps
-    provide a more consistent spatial input across camera placements.
+  <h3 style="text-align:center; font-size: 18px; margin-top: 34px;">Three Training Camera Viewpoints, One Held-Out Test Viewpoint</h3>
+  <figure class="framed">
+    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
+    <figcaption><b>Camera setup.</b> The external camera is placed at three training viewpoints (<b style="color:#b91c1c;">red</b>), while evaluation additionally includes one held-out viewpoint (<b style="color:#1e40af;">blue</b>). The wrist camera remains fixed.</figcaption>
+  </figure>
+
+  <h3 style="text-align:center; font-size: 18px; margin-top: 46px;">Training Demonstrations Across Three Camera Viewpoints</h3>
+
+  <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
+    The external camera is repositioned across three viewpoints during data collection, while the
+    wrist camera remains fixed. The same task therefore appears differently across demonstrations.
+    Below, one training demonstration per viewpoint, seen from the policy's external input camera
+    (clips at 2&times; speed).
   </p>
 
-  <div class="row2" style="max-width: 720px; margin: 22px auto;">
+  <div class="task-block">
+    <div class="train-grid" style="grid-template-columns: repeat(6, 1fr);">
+      <div class="tg-task" style="grid-column: span 3;">Stack blocks</div>
+      <div class="tg-task" style="grid-column: span 3;">Pick &amp; place</div>
+      <div class="tg-head">Train view 1</div>
+      <div class="tg-head">Train view 2</div>
+      <div class="tg-head">Train view 3</div>
+      <div class="tg-head">Train view 1</div>
+      <div class="tg-head">Train view 2</div>
+      <div class="tg-head">Train view 3</div>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg1.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg2.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg3.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg1.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg2.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg3.mp4" type="video/mp4"></video>
+      <div class="tg-task" style="grid-column: span 3; margin-top: 12px;">Open drawer</div>
+      <div class="tg-task" style="grid-column: span 3; margin-top: 12px;">Close drawer</div>
+      <div class="tg-head">Train view 1</div>
+      <div class="tg-head">Train view 2</div>
+      <div class="tg-head">Train view 3</div>
+      <div class="tg-head">Train view 1</div>
+      <div class="tg-head">Train view 2</div>
+      <div class="tg-head">Train view 3</div>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_open_cfg1.mp4" type="video/mp4"></video>
+      <div class="tg-empty">no drawer demos<br>at this viewpoint</div>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_open_cfg3.mp4" type="video/mp4"></video>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_close_cfg1.mp4" type="video/mp4"></video>
+      <div class="tg-empty">no drawer demos<br>at this viewpoint</div>
+      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_close_cfg3.mp4" type="video/mp4"></video>
+    </div>
+  </div>
+
+  <p class="body-text" style="margin-top: 34px;">
+    At evaluation, the external camera is placed either at one of the training viewpoints
+    (<b>seen</b>) or at a held-out viewpoint not used for data collection (<b>unseen</b>).
+    Pointmaps improve performance at both camera viewpoints, but the advantage grows from
+    <b>+5.0</b> points at the seen viewpoint to <b>+11.7</b> points at the unseen viewpoint.
+  </p>
+
+  <div class="row2" style="max-width: 720px; margin: 22px auto; align-items: stretch;">
     <div class="stat-line">
       <div class="stat-num good">73.3 &rarr; 78.3</div>
-      <div class="stat-desc">Seen camera placement, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+5.0).</div>
+      <div class="stat-desc">Seen camera viewpoint, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+5.0).</div>
     </div>
     <div class="stat-line">
       <div class="stat-num good">55.0 &rarr; 66.7</div>
-      <div class="stat-desc">Unseen camera placement, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+11.7).</div>
+      <div class="stat-desc">Unseen camera viewpoint, &pi;<sub>0.5</sub> &rarr; &pi;<sub>0.5</sub> + pointmap (+11.7).</div>
     </div>
   </div>
 
   <div class="table-wrap">
     <table class="results">
-      <caption>Real-world success rate (%), 15 rollouts per task per camera condition. DP3 is a from-scratch point-cloud diffusion policy, unlike FP3 in the simulation table (a DROID-pretrained point-cloud foundation policy).</caption>
+      <caption>Real-world success rate (%), 15 rollouts per task per camera viewpoint. DP3 is a from-scratch point-cloud diffusion policy, unlike FP3 in the simulation table (a DROID-pretrained point-cloud foundation policy).</caption>
       <thead>
-        <tr><th>Eval. camera</th><th>Model</th><th>Avg.</th><th>Pick-and-place</th><th>Stack blocks</th><th>Open drawer</th><th>Close drawer</th></tr>
+        <tr><th>Eval. viewpoint</th><th>Model</th><th>Avg.</th><th>Pick-and-place</th><th>Stack blocks</th><th>Open drawer</th><th>Close drawer</th></tr>
       </thead>
       <tbody>
         <tr><td rowspan="3">Seen</td><td>DP3</td><td>63.3</td><td>60.0</td><td>40.0</td><td>60.0</td><td>93.3</td></tr>
@@ -516,50 +562,12 @@
     </table>
   </div>
 
-  <h3 style="text-align:center; font-size: 18px;">Trained at Three Camera Viewpoints, Tested at an Unseen One</h3>
-
-  <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    <b>Viewpoint 1 to 3</b> are the three positions where the external camera stood while we
-    collected demonstrations. The wrist camera stays fixed. Below, one training demonstration per
-    viewpoint, seen from the policy's external input camera (clips at 2&times; speed). The same
-    tasks look very different depending on where the camera stands. Evaluation additionally uses a
-    held-out camera position that never appears in training.
+  <p class="body-text">
+    By expressing observed geometry in the robot frame, pointmaps provide a more consistent
+    spatial representation when the external camera moves beyond the training viewpoints.
   </p>
 
-  <div class="task-block">
-    <div class="train-grid" style="grid-template-columns: repeat(6, 1fr);">
-      <div class="tg-task" style="grid-column: span 3;">Stack blocks</div>
-      <div class="tg-task" style="grid-column: span 3;">Pick &amp; place</div>
-      <div class="tg-head">Viewpoint 1</div>
-      <div class="tg-head">Viewpoint 2</div>
-      <div class="tg-head">Viewpoint 3</div>
-      <div class="tg-head">Viewpoint 1</div>
-      <div class="tg-head">Viewpoint 2</div>
-      <div class="tg-head">Viewpoint 3</div>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg1.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg2.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_stack_cfg3.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg1.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg2.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_pnp_cfg3.mp4" type="video/mp4"></video>
-      <div class="tg-task" style="grid-column: span 3; margin-top: 12px;">Open drawer</div>
-      <div class="tg-task" style="grid-column: span 3; margin-top: 12px;">Close drawer</div>
-      <div class="tg-head">Viewpoint 1</div>
-      <div class="tg-head">Viewpoint 2</div>
-      <div class="tg-head">Viewpoint 3</div>
-      <div class="tg-head">Viewpoint 1</div>
-      <div class="tg-head">Viewpoint 2</div>
-      <div class="tg-head">Viewpoint 3</div>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_open_cfg1.mp4" type="video/mp4"></video>
-      <div class="tg-empty">no drawer demos<br>at this viewpoint</div>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_open_cfg3.mp4" type="video/mp4"></video>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_close_cfg1.mp4" type="video/mp4"></video>
-      <div class="tg-empty">no drawer demos<br>at this viewpoint</div>
-      <video autoplay muted loop playsinline><source src="static/videos/train_views/train_close_cfg3.mp4" type="video/mp4"></video>
-    </div>
-  </div>
-
-  <h3 style="text-align:center; font-size: 18px; margin-top: 46px;">Rollouts at Unseen Camera Viewpoints</h3>
+  <h3 style="text-align:center; font-size: 18px; margin-top: 46px;">Evaluation Rollouts at the Unseen Camera Viewpoint</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
     Note: Videos are recorded from a separate fixed camera and played at 2&times; speed.
     In each column, the top clip shows &pi;<sub>0.5</sub> and the bottom clip shows
@@ -591,7 +599,7 @@
       <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
         <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp.mp4" type="video/mp4"></video></div>
       <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
-        <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp2.mp4" type="video/mp4"></video></div>
+        <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp2.mp4?v=2" type="video/mp4"></video></div>
       <div class="roll-cell"><span class="roll-label ok">&pi;<sub>0.5</sub> + Pointmap &#10003;</span>
         <video data-sync="pnp" autoplay muted loop playsinline><source src="static/videos/rollouts/unseen_pnp_pmp3.mp4" type="video/mp4"></video></div>
     </div>
