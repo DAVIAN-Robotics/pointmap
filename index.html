@@ -88,7 +88,7 @@
     .stat-line { padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
     .stat-line + .stat-line { margin-top: 14px; }
     .stat-num { font-size: 25px; font-weight: 700; line-height: 1.2; }
-    .stat-num.bad { color: #ea7131; }   /* matches "Camera frame" orange in the concept figure */
+    .stat-num.bad { color: #111; }
     .stat-num.good { color: #229e39; }  /* matches "Robot frame" green in the concept figure */
     .stat-num.ours { color: #2563eb; }
     .stat-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
@@ -153,6 +153,7 @@
 
     /* two-column media rows */
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; margin: 28px 0; }
+    .row2 .stat-line + .stat-line { margin-top: 0; }
     @media (max-width: 760px) { .row2 { grid-template-columns: 1fr; } }
 
     /* equation block */
@@ -493,12 +494,6 @@
     viewpoint and at a held-out viewpoint not observed during training.
   </p>
 
-  <h3 style="text-align:center; font-size: 18px; margin-top: 34px;">Three Training Camera Viewpoints, One Held-Out Test Viewpoint</h3>
-  <figure class="framed">
-    <img src="static/images/fig7_real_setup.png" alt="Real robot setup: Franka FR3 with fixed wrist camera and repositioned external camera; four tasks.">
-    <figcaption><b>Camera setup.</b> The external camera is placed at three training viewpoints (<b style="color:#b91c1c;">red</b>), while evaluation additionally includes one held-out viewpoint (<b style="color:#1e40af;">blue</b>). The wrist camera remains fixed.</figcaption>
-  </figure>
-
   <p class="body-text" style="margin-top: 34px;">
     At evaluation, the external camera is placed either at one of the training viewpoints
     (<b>seen</b>) or at a held-out viewpoint not used for data collection (<b>unseen</b>).
@@ -541,10 +536,13 @@
 
   <h3 style="text-align:center; font-size: 18px; margin-top: 46px;">Per-Task Videos, From Training Views to Unseen-Viewpoint Rollouts</h3>
   <p class="body-text" style="font-size: 15.5px; color: var(--muted);">
-    Pick a task. The top row shows one training demonstration from each training viewpoint, seen
-    from the policy's external input camera. The rows below show evaluation rollouts at the unseen
-    viewpoint, recorded from a separate fixed camera, comparing &pi;<sub>0.5</sub> and
-    &pi;<sub>0.5</sub> + Pointmap. All clips play at 2&times; speed.
+    Pick a task. The external camera is placed at three training viewpoints during data
+    collection, and evaluation additionally uses a held-out viewpoint that never appears in
+    training. The wrist camera remains fixed throughout. The top row shows one training
+    demonstration from each training viewpoint, seen from the policy's external input camera.
+    The rows below show evaluation rollouts at the unseen viewpoint, recorded from a separate
+    fixed camera, comparing &pi;<sub>0.5</sub> and &pi;<sub>0.5</sub> + Pointmap. All clips
+    play at 2&times; speed.
   </p>
 
   <div class="task-tabs">
