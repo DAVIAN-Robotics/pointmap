@@ -373,12 +373,13 @@
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
   <h2 class="sec-label">Solution</h2>
-  <div class="sec-claim">Robot-Centric Pointmaps Reduce the Frame Mismatch</div>
+  <div class="sec-claim">See Like a Robot with Robot-Centric Pointmaps</div>
 
   <p class="body-text">
-    Rather than asking the policy to learn this viewpoint-dependent mapping, we transform the
-    observation into the robot frame before policy learning. A robot-centric pointmap
-    combines two properties:
+    Rather than asking the policy to learn the viewpoint-dependent mapping from camera-frame
+    observations to robot-frame actions, we express the observed 3D geometry directly in the
+    robot frame. <b>Robot-centric pointmaps reduce this frame mismatch</b> while preserving
+    the dense H&thinsp;&times;&thinsp;W image grid used by pretrained VLAs.
   </p>
   <ul class="req-list">
     <li>Robot-frame geometry. Each pixel stores a 3D coordinate in the frame where robot actions are defined.</li>
