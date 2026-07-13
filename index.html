@@ -338,7 +338,8 @@
   <p class="body-text" style="margin-top: 28px;">
     Why does this viewpoint variation matter?
     <b>A VLA receives visual observations tied to the camera frame, while the action labels in
-    robot datasets are defined in a robot-centric coordinate frame.</b>
+    robot datasets are defined in a robot-centric coordinate frame, creating an
+    observation-to-action frame mismatch.</b>
     As the viewpoint changes, each observation is expressed in a different camera frame, while
     the action labels remain expressed in the same robot-centric frame. The policy must
     therefore learn how observations from multiple camera frames map to robot-frame actions.
