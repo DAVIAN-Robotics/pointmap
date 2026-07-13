@@ -373,17 +373,17 @@
 <!-- =============================== METHOD =============================== -->
 <section class="container" id="method">
   <h2 class="sec-label">Solution</h2>
-  <div class="sec-claim">See Like a Robot with Robot-Centric Pointmaps</div>
+  <div class="sec-claim">Bridge Camera-Frame Observations and Robot-Frame Actions with Pointmaps</div>
 
   <p class="body-text">
-    Rather than asking the policy to learn the viewpoint-dependent mapping from camera-frame
-    observations to robot-frame actions, we express the observed 3D geometry directly in the
-    robot frame. <b>Robot-centric pointmaps reduce this frame mismatch</b> while preserving
-    the dense H&thinsp;&times;&thinsp;W image grid used by pretrained VLAs.
+    Rather than asking the policy to learn how each camera frame maps to robot-frame actions,
+    we express the observed 3D geometry from different viewpoints in a shared robot frame.
+    <b>Robot-centric pointmaps bridge this frame mismatch while preserving the image-form
+    representation used by pretrained VLAs.</b>
   </p>
   <ul class="req-list">
-    <li>Robot-frame geometry. Each pixel stores a 3D coordinate in the frame where robot actions are defined.</li>
-    <li>Image-form structure. The dense H&thinsp;&times;&thinsp;W grid is preserved, allowing the pointmap to use the image-based visual pathway of a pretrained VLA.</li>
+    <li><b>Robot-frame geometry.</b> Each pixel stores the 3D coordinate of its corresponding scene point in the frame where robot actions are defined.</li>
+    <li><b>Image-form structure.</b> The dense H&thinsp;&times;&thinsp;W grid is preserved, maintaining spatial correspondence with RGB.</li>
   </ul>
 
   <figure>
