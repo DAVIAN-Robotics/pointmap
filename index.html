@@ -153,6 +153,9 @@
 
     /* two-column media rows */
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; margin: 28px 0; }
+    .tldr-row { display: grid; grid-template-columns: 1.58fr 1fr; gap: 30px; align-items: center; margin: 26px auto 0; }
+    .tldr-row .cell-r { border-left: 1px solid var(--border); padding-left: 30px; }
+    @media (max-width: 760px) { .tldr-row { grid-template-columns: 1fr; } .tldr-row .cell-r { border-left: none; padding-left: 0; } }
     .row2 .stat-line + .stat-line { margin-top: 0; }
     @media (max-width: 760px) { .row2 { grid-template-columns: 1fr; } }
 
@@ -306,6 +309,26 @@
     </a>
   </div>
 </div>
+
+<!-- =============================== TL;DR (highlight first, details below) =============================== -->
+<section class="container" id="tldr" style="margin: 44px auto 8px; max-width: 1300px;">
+  <p style="text-align: center; font-family: 'Google Sans', 'Noto Sans', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.45; margin: 0 auto 6px; max-width: 940px;">
+    TL;DR&nbsp;&mdash;&nbsp;Give a VLA per-pixel 3D in the robot frame,<br>and it stays robust as training-time camera viewpoint variation grows.
+  </p>
+
+  <div class="tldr-row">
+    <img src="static/images/fig10_architecture.png?v=4" alt="Architecture: a pointmap encoder is added next to the RGB encoder and its tokens are element-wise added before the LLM backbone." style="width: 100%;">
+    <div class="cell-r">
+      <img src="static/images/fig6_robustness.png?v=7" alt="As camera variation during training grows from none to high, RGB-only drops from 34.5 to 24.9 while RGB + Pointmap stays near 36, widening the gap from +3.1 to +10.9 points." style="width: 100%;">
+    </div>
+  </div>
+
+  <p class="body-text" style="text-align: center; font-size: 15.5px; color: var(--muted); max-width: 960px; margin: 22px auto 0;">
+    Robot datasets mix demonstrations from many camera viewpoints; as that training-time variation grows,
+    an RGB-only policy degrades while pointmaps keep it robust, widening the gap to <b style="color: var(--text);">+10.9 points</b>.<br>
+    <b style="color: var(--text);">The whole method is one extra encoder and one element-wise addition.</b>
+  </p>
+</section>
 
 <!-- =============================== TEASER (1-min overview video) =============================== -->
 <div class="container">
