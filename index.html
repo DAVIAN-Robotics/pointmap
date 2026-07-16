@@ -367,21 +367,18 @@
 
   <p class="body-text" style="margin-top: 28px;">
     Why does this viewpoint variation matter?
-    <b>A VLA receives visual observations tied to the camera frame, while the action labels in
-    robot datasets are defined in a robot-centric coordinate frame, creating an
-    observation-to-action frame mismatch.</b>
-    As the viewpoint changes, each observation is expressed in a different camera frame, while
-    the action labels remain expressed in the same robot-centric frame. The policy must
-    therefore learn how observations from multiple camera frames map to robot-frame actions.
+    <b>A VLA observes the scene in the camera frame but predicts actions in a robot-centric
+    frame, creating an observation-to-action frame mismatch.</b>
+    With a fixed camera, this mapping remains consistent across demonstrations. As training
+    data spans more viewpoints, however, the policy must generalize the mapping from multiple
+    camera frames to the shared robot-frame action space, making the task harder to learn.
   </p>
 
   <p class="body-text">
-    With a fixed camera, this mapping remains consistent across demonstrations. When the
-    training data spans many viewpoints, however, the policy must generalize this mapping
-    across camera frames, making it harder to learn. To test this, we conduct a controlled
-    study on 24 RoboCasa tasks. Using a &pi;-style model initialized from a base PaliGemma
-    checkpoint, we vary only the amount of camera viewpoint randomization across training
-    demonstrations while keeping the remaining training and evaluation settings fixed.
+    To test this, we conduct a controlled study on 24 RoboCasa tasks. Using a &pi;-style model
+    initialized from a base PaliGemma checkpoint, we vary only the amount of camera viewpoint
+    randomization across training demonstrations while keeping the remaining training and
+    evaluation settings fixed.
   </p>
 
   <figure style="margin: 24px auto 0; max-width: 1000px;">
