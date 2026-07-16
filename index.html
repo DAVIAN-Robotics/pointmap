@@ -153,7 +153,7 @@
 
     /* two-column media rows */
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; margin: 28px 0; }
-    .tldr-row { display: grid; grid-template-columns: 0.84fr 1fr; gap: 30px; align-items: center; margin: 26px auto 0; }
+    .tldr-row { display: grid; grid-template-columns: 0.84fr 1fr; gap: 26px; align-items: center; margin: 26px auto 0; max-width: 960px; }
     .tldr-row .cell-r { border-left: 1px solid var(--border); padding-left: 30px; }
     @media (max-width: 760px) { .tldr-row { grid-template-columns: 1fr; } .tldr-row .cell-r { border-left: none; padding-left: 0; } }
     .row2 .stat-line + .stat-line { margin-top: 0; }
@@ -310,8 +310,18 @@
   </div>
 </div>
 
+<!-- =============================== TEASER (1-min overview video) =============================== -->
+<div class="container">
+  <div style="max-width: 960px; margin: 28px auto 0;">
+    <video autoplay muted loop playsinline controls style="width: 100%; border-radius: 10px; display: block;">
+      <source src="static/videos/teaser.mp4?v=2" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+
 <!-- =============================== TL;DR (highlight first, details below) =============================== -->
-<section class="container" id="tldr" style="margin: 44px auto 8px; max-width: 1300px;">
+<section class="container" id="tldr" style="margin: 44px auto 8px;">
   <p style="text-align: center; font-family: 'Google Sans', 'Noto Sans', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.45; margin: 0 auto 6px; max-width: 940px;">
     TL;DR&nbsp;&mdash;&nbsp;Give a VLA per-pixel 3D in the robot frame,<br>and it stays robust as training-time camera viewpoint variation grows.
   </p>
@@ -329,16 +339,6 @@
     <b style="color: var(--text);">The whole method is one extra encoder and one element-wise addition.</b>
   </p>
 </section>
-
-<!-- =============================== TEASER (1-min overview video) =============================== -->
-<div class="container">
-  <div style="max-width: 960px; margin: 28px auto 0;">
-    <video autoplay muted loop playsinline controls style="width: 100%; border-radius: 10px; display: block;">
-      <source src="static/videos/teaser.mp4?v=2" type="video/mp4">
-    </video>
-  </div>
-</div>
-
 
 <!-- =============================== SETTING =============================== -->
 <section class="container" id="setting">
