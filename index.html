@@ -2,17 +2,684 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
-  <title>TBD</title>
+  <title>See like a Robot: Robot-Centric Pointmaps for VLA Models</title>
+  <meta name="description" content="SeeR-VLA gives pretrained VLAs dense, image-aligned 3D geometry with an end-effector origin and robot-base-aligned axes.">
+  <!-- Open Graph (for link previews on Twitter/Slack etc.) -->
+  <meta property="og:title" content="See like a Robot: Robot-Centric Pointmaps for VLA Models">
+  <meta property="og:description" content="SeeR-VLA gives pretrained VLAs dense, image-aligned 3D geometry with an end-effector origin and robot-base-aligned axes.">
+  <meta property="og:image" content="static/images/motivation.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
   <style>
-    html, body { height: 100%; margin: 0; }
-    body {
-      display: flex; align-items: center; justify-content: center;
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 1.5rem; color: #888; background: #fff;
+    :root {
+      --text: #1f2430;
+      --muted: #5b6270;
+      --accent: #2563eb;      /* link blue */
+      --accent-dark: #1e40af;
+      --ours-bg: #eaf3ff;     /* shaded "ours" rows */
+      --border: #e3e6ec;
+      --card-bg: #f7f8fa;
     }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.78;
+      font-size: 18px;
+      background: #ffffff;
+    }
+    .container { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3, .sec-label, .sec-claim, .sub-head, .authors, .affil {
+      font-family: "Google Sans", "Noto Sans", sans-serif;
+    }
+    section.container { margin: 56px auto; }
+
+    /* ---------- Hero ---------- */
+    .hero { text-align: center; padding-top: 56px; }
+    h1.title {
+      font-size: clamp(26px, 4.2vw, 40px);
+      font-weight: 700; line-height: 1.25; margin-bottom: 22px;
+    }
+    h1.title .subtitle-break { display: block; }
+    .authors { font-size: 18px; margin-bottom: 6px; }
+    .authors a { color: var(--accent); text-decoration: none; }
+    .authors a:hover { text-decoration: underline; }
+    .authors sup { font-size: 12px; color: var(--muted); }
+    .affil { font-size: 16px; color: var(--muted); margin-bottom: 4px; }
+    .eqnote { font-size: 13.5px; color: var(--muted); margin-bottom: 26px; }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #222831; color: #fff; text-decoration: none;
+      font-size: 15.5px; font-weight: 600;
+      border-radius: 999px; padding: 9px 20px;
+      transition: background .15s ease, transform .15s ease;
+    }
+    .btn:hover { background: #000; transform: translateY(-1px); }
+    .btn.disabled { background: #9aa0ab; cursor: default; pointer-events: none; }
+    .btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* ---------- Figures ---------- */
+    figure { margin: 28px 0; text-align: center; }
+    figure img {
+      max-width: 100%; height: auto; border-radius: 6px;
+    }
+    figure.framed img { border: 1px solid var(--border); padding: 10px; background: #fff; }
+    figcaption {
+      margin: 12px auto 0; font-size: 14.5px; color: var(--muted); line-height: 1.55;
+      text-align: left;
+    }
+    figcaption b { color: var(--text); }
+    .tagline {
+      text-align: center; font-size: 19px; max-width: 780px; margin: 26px auto 30px; color: var(--text);
+    }
+
+    .tagline b { color: var(--accent-dark); }
+
+    /* problem-evidence row (intro, CamVLA-style claim + numbers) */
+    .evidence-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items: center; margin: 30px auto 0; }
+    @media (max-width: 760px) { .evidence-row { grid-template-columns: 1fr; } }
+    .stat-line { padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
+    .stat-line + .stat-line { margin-top: 14px; }
+    .stat-num { font-size: 25px; font-weight: 700; line-height: 1.2; }
+    .stat-num.bad { color: #111; }
+    .stat-num.good { color: #229e39; }  /* matches "Robot frame" green in the concept figure */
+    .stat-num.ours { color: #2563eb; }
+    .stat-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 3px; }
+    .rootcause { text-align: center; font-size: 15.5px; max-width: 780px; margin: 24px auto 0; }
+    ul.req-list { margin: 0 auto 16px; padding-left: 26px; }
+    ul.req-list li { margin: 7px 0; }
+
+    /* ---------- Sections ---------- */
+    .sec-label {
+      margin: 0 auto 16px; font-size: 30px; font-weight: 600;
+      text-align: left; color: var(--accent);
+      border-bottom: 1px solid #e5e5e5; padding-bottom: 10px;
+    }
+    .sub-head {
+      margin: 40px auto 14px; font-size: 24px; font-weight: 600;
+      text-align: left; line-height: 1.3;
+    }
+    .sec-claim {
+      margin: 0 auto 14px; font-size: 24px; font-weight: 600;
+      text-align: left; line-height: 1.3;
+    }
+    h2 {
+      font-size: 30px; font-weight: 600; text-align: center; margin-bottom: 22px;
+    }
+    h3 { font-size: 20px; font-weight: 700; margin: 30px 0 10px; }
+    p.body-text { margin: 0 auto 20px; }
+
+    /* Key takeaways (collapsible) */
+    .takeaways { margin: 0 auto; }
+    details.takeaway {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+      margin: 12px 0; overflow: hidden;
+    }
+    details.takeaway summary {
+      list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 12px;
+      padding: 16px 20px; font-size: 17px; font-weight: 700; line-height: 1.5;
+    }
+    details.takeaway summary::-webkit-details-marker { display: none; }
+    details.takeaway summary .tk-num {
+      flex: none; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-dark); color: #fff; font-size: 14px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      align-self: flex-start; margin-top: 2px;
+    }
+    details.takeaway summary .chev {
+      margin-left: auto; align-self: center; flex: none;
+      color: var(--muted); font-size: 13px; transition: transform .2s ease;
+    }
+    details.takeaway[open] summary .chev { transform: rotate(180deg); }
+    details.takeaway summary:hover { background: #eef0f4; }
+    .tk-body { padding: 2px 20px 18px 58px; font-size: 15.5px; color: var(--muted); }
+    .tk-body b { color: var(--text); }
+    .tk-body figure { margin: 16px 0 4px; }
+    .tk-body .rq-tag { font-size: 13px; font-weight: 600; color: var(--accent-dark); letter-spacing: .03em; }
+    table.mini {
+      border-collapse: collapse; font-size: 14.5px; margin: 12px auto 4px;
+    }
+    table.mini th, table.mini td { padding: 5px 14px; text-align: center; border-bottom: 1px solid var(--border); }
+    table.mini td:first-child, table.mini th:first-child { text-align: left; }
+    table.mini thead th { border-bottom: 2px solid var(--text); }
+    table.mini tr.ours { background: var(--ours-bg); font-weight: 600; }
+
+    /* two-column media rows */
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; margin: 28px 0; }
+    .tldr-row { display: grid; grid-template-columns: 0.84fr 1fr; gap: 26px; align-items: center; margin: 26px auto 0; max-width: 960px; }
+    .tldr-row .cell-r { border-left: 1px solid var(--border); padding-left: 30px; }
+    @media (max-width: 760px) { .tldr-row { grid-template-columns: 1fr; } .tldr-row .cell-r { border-left: none; padding-left: 0; } }
+    .row2 .stat-line + .stat-line { margin-top: 0; }
+    @media (max-width: 760px) { .row2 { grid-template-columns: 1fr; } }
+
+    /* equation block */
+    .eqs {
+      max-width: 640px; margin: 10px auto 34px; background: var(--card-bg);
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px;
+    }
+    .eq { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding: 7px 0; flex-wrap: wrap; }
+    .eq + .eq { border-top: 1px dashed var(--border); }
+    .eq-math { font-family: "STIX Two Math", "Cambria Math", Georgia, serif; font-size: 16.5px; white-space: nowrap; }
+    .eq-note { font-size: 13.5px; color: var(--muted); }
+
+    /* ---------- Tables ---------- */
+    .table-wrap { overflow-x: auto; margin: 24px auto; }
+    table.results {
+      border-collapse: collapse; margin: 0 auto; font-size: 15px; min-width: 640px;
+    }
+    table.results caption {
+      caption-side: top; text-align: left; font-size: 14.5px; color: var(--muted); padding-bottom: 10px;
+    }
+    table.results th, table.results td { padding: 7px 14px; text-align: center; }
+    table.results thead th { border-bottom: 2px solid var(--text); font-weight: 700; }
+    table.results td:first-child, table.results th:first-child { text-align: left; }
+    table.results tbody tr { border-bottom: 1px solid var(--border); }
+    table.results tr.group td { font-style: italic; color: var(--muted); border-bottom: none; padding-top: 12px; }
+    table.results tr.ours { background: var(--ours-bg); }
+    table.results tr.ours td { font-weight: 600; }
+    table.results .best { font-weight: 700; }
+
+    /* ---------- Video placeholder ---------- */
+    .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 640px) { .video-grid { grid-template-columns: 1fr; } }
+    .video-slot {
+      border: 2px dashed #c9ced8; border-radius: 10px; aspect-ratio: 16/9;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 15px; text-align: center; padding: 12px;
+      background: var(--card-bg);
+    }
+    .video-grid video { width: 100%; border-radius: 10px; display: block; }
+    .teaser-video { max-width: 860px; margin: 28px auto 0; }
+    .teaser-video video, .wide-video video { width: 100%; border-radius: 10px; display: block; }
+    .wide-video { max-width: 900px; margin: 24px auto 0; }
+
+    /* per-task rollout gallery */
+    .task-block { width: min(1120px, 96vw); margin: 34px auto 0; position: relative; left: 50%; transform: translateX(-50%); }
+    .task-name { font-weight: 700; font-size: 17px; margin-bottom: 8px; text-align: center; }
+    .vid-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .vid-pair { grid-template-columns: 1fr; } }
+    .vid-pair video { width: 100%; border-radius: 8px; display: block; }
+    .vid-tag {
+      font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px;
+      text-align: center; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .vid-tag.unseen { color: var(--accent-dark); }
+    .vid-tag.train { color: #b91c1c; }
+
+    /* unseen rollout: π0.5 clip stacked above pointmap clip, overlay labels */
+    .roll-cell { position: relative; }
+    .roll-cell video { width: 100%; border-radius: 8px; display: block; }
+    .roll-cell + .roll-cell { margin-top: 8px; }
+    .train-grid .roll-cell { margin-top: 0; }
+    .roll-compact .roll-label { font-size: 11px; padding: 2px 8px; top: 6px; left: 6px; }
+    .roll-label {
+      position: absolute; top: 9px; left: 9px; z-index: 2;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+      padding: 3px 11px; border-radius: 999px;
+      background: rgba(255,255,255,.9); border: 1px solid var(--border);
+    }
+    .roll-label.fail { color: #b91c1c; border-color: #fca5a5; }
+    .roll-label.ok { color: #15803d; border-color: #86efac; }
+
+    /* training-view grid */
+    .train-grid { display: grid; grid-template-columns: 96px repeat(4, 1fr); gap: 8px; align-items: center; }
+    .tg-task { text-align: center; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .train-grid img, .train-grid video { width: 100%; border-radius: 6px; display: block; }
+    .tg-head { text-align: center; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #b91c1c; }
+    .tg-label { font-size: 13px; font-weight: 700; color: #b91c1c; text-align: right; padding-right: 4px; line-height: 1.3; }
+    .tg-empty { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12.5px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 6px; align-self: stretch; }
+
+    /* task tab gallery */
+    .task-tabs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 24px 0 4px; }
+    .task-pill {
+      font-family: "Google Sans", "Noto Sans", sans-serif;
+      font-size: 15px; font-weight: 600; color: var(--text);
+      background: #fff; border: 1.5px solid var(--border); border-radius: 999px;
+      padding: 8px 22px; cursor: pointer;
+      transition: border-color .15s ease, background .15s ease, color .15s ease;
+    }
+    .task-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .task-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .task-pane.hidden-pane { display: none; }
+    .pane-label { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+    /* ---------- BibTeX ---------- */
+    .bibtex-box { position: relative; margin: 20px auto 0; }
+    pre.bibtex {
+      background: #f4f5f7; border: 1px solid var(--border); border-radius: 10px;
+      padding: 22px 24px; overflow-x: auto; font-size: 14px; line-height: 1.5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; padding: 5px 12px; cursor: pointer; color: var(--muted);
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ---------- Footer ---------- */
+    footer {
+      border-top: 1px solid var(--border); margin-top: 70px; padding: 28px 0 40px;
+      font-size: 14px; color: var(--muted); text-align: center;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
   </style>
+  <style>
+    .figure-link { display: block; }
+    .figure-link img { display: block; margin: 0 auto; }
+    .caption-note { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+    .combined-results th, .combined-results td { white-space: nowrap; }
+    .combined-results thead tr:first-child th:nth-child(2), .combined-results tbody td:nth-child(2) { border-right: 1px solid var(--border); }
+    .combined-results thead tr:first-child th[colspan] { border-bottom: 1px solid var(--border); }
+    .section-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin: 20px auto 0; font-size: 14px; }
+    .section-links a { color: var(--muted); text-decoration: none; }
+    .section-links a:hover { color: var(--accent); }
+    .takeaway .table-wrap { margin: 14px 0; }
+    .eq-math { white-space: normal; }
+    .analysis-figure { max-width: 600px; margin-left: auto; margin-right: auto; }
+    .copy-btn { min-width: 64px; }
+    pre.bibtex { padding-top: 52px; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+    @media (max-width: 600px) {
+      .hero { padding-top: 34px; }
+      .authors { font-size: 16px; }
+      .affil { font-size: 14px; }
+      .sec-label { font-size: 27px; }
+      .sec-claim { font-size: 22px; }
+      .tk-body { padding-left: 20px; }
+      table.mini th, table.mini td { padding: 6px 10px; }
+      .eqs { padding: 12px 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+
+    .frame-tabs { display: flex; gap: 10px; margin: 24px 0 18px; }
+    .frame-tabs button { font: inherit; font-weight: 700; padding: 12px 20px; border: 1px solid var(--border); border-radius: 8px; background: #f6f7f9; color: var(--text); cursor: pointer; }
+    .frame-tabs button[aria-selected="true"] { background: #eaf1ff; border-color: #2962ff; color: #245be8; }
+    .frame-intro { font-size: 18px; line-height: 1.6; margin: 0 0 20px; }
+    .frame-scroll { overflow-x: auto; margin: 16px 0; }
+    .origin-example { display: grid; grid-template-columns: 134px minmax(0, 1fr); gap: 10px 14px; min-width: 640px; }
+    .object-labels, .axis-labels { display: grid; text-align: center; font-size: 16px; font-weight: 700; gap: 12px; }
+    .object-labels { grid-template-columns: repeat(5, 1fr); }
+    .axis-labels { grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; }
+    .row-labels { display: grid; grid-template-rows: repeat(3, 1fr); text-align: right; font-size: 16px; font-weight: 700; }
+    .row-labels span { align-self: center; }
+    .row-labels .good, .axis-labels .good { color: #229e39; }
+    .origin-example video, .axes-example video { display: block; width: 100%; height: auto; border-radius: 6px; }
+    .axes-example { min-width: 640px; }
+    #coordinate-frame [hidden] { display: none; }
+    @media (max-width: 640px) { .frame-tabs button { padding: 10px 12px; font-size: 15px; } }
+    /* Avoid a single trailing word without forcing fixed line breaks. */
+    p, li, figcaption, caption, .stat-desc, .frame-intro { text-wrap: pretty; }
+    h1, h2, .sec-claim, summary { text-wrap: balance; }
+    .analysis-panel { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px; align-items: center; padding: 20px 0; }
+    .analysis-panel + .analysis-panel { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 30px; }
+    .analysis-panel figure { margin: 0; }
+    .analysis-explanation h3 { font-size: 21px; line-height: 1.4; margin: 0 0 16px; color: var(--text); text-wrap: balance; }
+    .analysis-explanation p { margin: 0 0 14px; }
+    .analysis-explanation .stat-line { margin: 18px 0; }
+    @media (max-width: 760px) { .analysis-panel { grid-template-columns: 1fr; gap: 20px; } .analysis-explanation { grid-row: 1; } }
+</style>
 </head>
-<body>TBD</body>
+<body>
+<div class="container hero">
+  <h1 class="title">See like a Robot: <span class="subtitle-break">Robot-Centric Pointmaps for VLA Models</span></h1>
+
+  <p class="authors">
+    <a href="https://lee15253.github.io/">Byungkun Lee</a><sup>1*,&dagger;</sup>,
+    <a href="https://godnpeter.github.io/">Dongyoon Hwang</a><sup>1*</sup>,
+    <a href="https://k00dj-19.github.io/">Dongjin Kim</a><sup>1</sup>,
+    <a href="https://joonleesky.github.io/">Hojoon Lee</a><sup>2</sup>,
+    <a href="https://mynsng.github.io/">Hyunseung Kim</a><sup>1,3</sup>,
+    <a href="https://sites.google.com/site/jaegulchoo/">Jaegul Choo</a><sup>1</sup>,
+    <a href="https://pmh9960.github.io/">Minho Park</a><sup>1</sup>
+  </p>
+  <p class="affil"><sup>1</sup>KAIST AI&emsp;<sup>2</sup>Holiday Robotics&emsp;<sup>3</sup>KRAFTON AI</p>
+  <p class="eqnote"><sup>*</sup>Equal contribution&emsp;<sup>&dagger;</sup>Corresponding author</p>
+
+  <div class="btn-row">
+    <a class="btn" href="https://arxiv.org/abs/2607.11498v2">
+      <svg viewBox="0 0 384 512"><path d="M181.9 256.1c-5-16-4.9-46.9-2-46.9 8.4 0 7.6 36.9 2 46.9zm-1.7 47.2c-7.7 20.2-17.3 43.3-28.4 62.7 18.3-7 39-17.2 62.9-21.9-12.7-9.6-24.9-23.4-34.5-40.8zM86.1 428.1c0 .8 13.2-5.4 34.9-40.2-6.7 6.3-29.1 24.5-34.9 40.2zM248 160h136v328c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V24C0 10.7 10.7 0 24 0h200v136c0 13.2 10.8 24 24 24zm-8 171.8c-20-12.2-33.3-29-42.7-53.8 4.5-18.5 11.6-46.6 6.2-64.2-4.7-29.4-42.4-26.5-47.8-6.8-5 18.3-.4 44.1 8.1 77-11.6 27.6-28.7 64.6-40.8 85.8-.1 0-.1.1-.2.1-27.1 13.9-73.6 44.5-54.5 68 5.6 6.9 16 10 21.5 10 17.9 0 35.7-18 61.1-61.8 25.8-8.5 54.1-19.1 79-23.2 21.7 11.8 47.1 19.5 64 19.5 29.2 0 31.2-32 19.7-43.4-13.9-13.6-54.3-9.7-73.6-7.2zM377 105L279 7c-4.5-4.5-10.6-7-17-7h-6v128h128v-6.1c0-6.3-2.5-12.4-7-16.9zm-74.1 255.3c4.1-2.7-2.5-11.9-42.8-9 37.1 15.8 42.8 9 42.8 9z"/></svg>
+      arXiv
+    </a>
+    <a class="btn" href="static/pdfs/see_like_a_robot.pdf">
+      <svg viewBox="0 0 512 512"><path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V304H176c-35.3 0-64 28.7-64 64V512H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128zM176 352h32c30.9 0 56 25.1 56 56s-25.1 56-56 56H192v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24H192v48h16zm96-80h32c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H304c-8.8 0-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H320v96h16zm80-112c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16s-7.2 16-16 16H448v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16H448v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V368z"/></svg>
+      Paper
+    </a>
+    <span class="btn disabled" aria-disabled="true" title="Code">
+      <svg viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8z"/></svg>
+      Code
+    </span>
+    <a class="btn" href="#bibtex">
+      <svg viewBox="0 0 448 512"><path d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z"/></svg>
+      BibTeX
+    </a>
+  </div>
+</div>
+
+<main>
+<!-- Website edit: Motivation (source 00:04) through the final Takeaway. -->
+<div class="container" id="overview-video" style="margin: 28px auto 0;">
+  <div style="max-width: 960px; margin: 0 auto;">
+    <video id="seer-overview" autoplay muted playsinline controls preload="metadata"
+      poster="static/images/overview-poster.jpg" width="1920" height="1080"
+      aria-label="SeeR-VLA overview: motivation, method, experiments, and takeaway"
+      style="width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; display: block;">
+      <source src="static/videos/seer-vla-overview.mp4" type="video/mp4">
+      <a href="static/videos/seer-vla-overview.mp4">Watch the SeeR-VLA overview video.</a>
+    </video>
+  </div>
+</div>
+<section class="container" id="tldr" style="margin: 38px auto 8px;">
+  <p style="text-align: center; font-family: 'Google Sans', 'Noto Sans', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.45; max-width: 940px; margin: 0 auto;">
+    Give a VLA each pixel's 3D position relative to the gripper.<br>
+    Keep the coordinate axes aligned with the robot base.
+  </p>
+  <nav class="section-links" aria-label="Page sections">
+    <a href="#motivation">Motivation</a><a href="#method">Method</a><a href="#coordinate-frame">Coordinate frame</a><a href="#results">Results</a><a href="#analysis">Analysis</a>
+  </nav>
+</section>
+
+<section class="container" id="motivation">
+  <h2 class="sec-label">Motivation</h2>
+  <div class="sec-claim">Manipulation Needs the Target's Position Relative to the Gripper</div>
+  <p class="body-text">
+    Manipulation requires the target position relative to the end effector.
+    RGB leaves this 3D relationship implicit. Depth measures distance from the camera.
+  </p>
+  <figure>
+    <a class="figure-link" href="static/images/motivation.png" target="_blank" rel="noopener" aria-label="Open the RGB, depth, and robot-centric pointmap comparison at full resolution">
+      <img src="static/images/motivation.png" alt="RGB describes appearance; depth measures camera-relative distance; a robot-centric pointmap stores each surface point's position relative to the end effector." loading="lazy" width="2200" height="560">
+    </a>
+    <figcaption><b>From appearance to interaction geometry.</b> A robot-centric pointmap stores three coordinates at each image pixel. The origin is at the end effector. The axes stay aligned with the robot base. Colors visualize the numerical XYZ values received by the policy.</figcaption>
+  </figure>
+  <p class="body-text">
+    Back-projecting depth with camera intrinsics gives each pixel a 3D position. Keeping these positions on the
+    <b>same dense image grid as RGB</b> produces a pointmap. Expressing them in robot coordinates makes a visible
+    scene point's coordinates independent of camera placement. Centering them at the gripper directly exposes
+    the geometry of the interaction.
+  </p>
+</section>
+
+<section class="container" id="method">
+  <h2 class="sec-label">Solution</h2>
+  <div class="sec-claim">Robot-Centric Geometry on the RGB Grid</div>
+  <p class="body-text">
+    SeeR-VLA augments a pretrained VLA with an image-aligned <b>H &times; W &times; 3 pointmap for each view</b>.
+    We lift depth into 3D and transform the points into the robot base frame. We then subtract the current end-effector position.
+    This changes the origin while preserving the robot-base axis directions.
+  </p>
+  <figure class="framed">
+    <a class="figure-link" href="static/images/architecture.png" target="_blank" rel="noopener" aria-label="Open the SeeR-VLA architecture at full resolution">
+      <img src="static/images/architecture.png" alt="RGB-D observations become camera-frame pointmaps, then robot-centric pointmaps. Separate RGB and pointmap encoders produce aligned tokens that are added before entering the VLA." loading="lazy" width="2200" height="757">
+    </a>
+    <figcaption><b>One extra encoder and element-wise addition.</b> The pointmap encoder has the same architecture as the RGB encoder and starts from its pretrained weights. Both encoders are updated during training. Corresponding features are added and replace the original RGB tokens.</figcaption>
+  </figure>
+  <ul class="req-list">
+    <li><b>Dense geometry.</b> Keep a 3D coordinate at each valid RGB pixel.</li>
+    <li><b>A common robot reference.</b> Express all views in the same robot coordinate frame.</li>
+    <li><b>Aligned feature fusion.</b> Add matching RGB and pointmap features without adding tokens.</li>
+  </ul>
+</section>
+
+<section class="container" id="coordinate-frame">
+  <h2 class="sec-label">Coordinate Frame</h2>
+  <div class="sec-claim">An End-Effector Origin. Robot-Base Axes.</div>
+  <p class="body-text">Pointmaps make 3D geometry explicit. <b>Where we place the origin and how we orient the axes also matter.</b> These two examples show why we center coordinates at the gripper while keeping their directions fixed to the robot base.</p>
+  <div class="frame-tabs" role="tablist" aria-label="Coordinate-frame examples">
+    <button id="origin-tab" role="tab" aria-selected="true" aria-controls="origin-panel" type="button">1. Choose the origin</button>
+    <button id="axes-tab" role="tab" aria-selected="false" aria-controls="axes-panel" tabindex="-1" type="button">2. Choose the axes</button>
+  </div>
+  <div id="origin-panel" role="tabpanel" aria-labelledby="origin-tab" tabindex="0">
+    <p class="frame-intro"><b>Similar grasps share similar coordinates.</b> An EE origin keeps the grasp region near zero across five objects and locations. White indicates coordinates near zero. A base origin gives it different coordinates depending on where the interaction happens.</p>
+    <div class="frame-scroll">
+      <div class="origin-example">
+        <div></div><div class="object-labels"><span>Potato</span><span>Mug</span><span>Broccoli</span><span>Apple</span><span>Stove knob</span></div>
+        <div class="row-labels"><span>Wrist RGB</span><span>Robot-base<br>origin</span><span class="good">End-effector<br>origin (ours)</span></div>
+        <video controls muted playsinline loop preload="metadata" poster="static/images/coordinate-origin.jpg" width="1186" height="694" aria-label="Five grasp examples comparing robot-base and end-effector origins">
+          <source src="static/videos/coordinate-origin.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+  <div id="axes-panel" role="tabpanel" aria-labelledby="axes-tab" tabindex="0" hidden>
+    <p class="frame-intro"><b>Move the origin without rotating the axes.</b> EE-aligned axes turn with the wrist. This changes coordinates even for static scene points. Robot-base axes keep coordinate directions consistent.</p>
+    <div class="frame-scroll">
+      <div class="axes-example">
+        <div class="axis-labels"><span>RGB</span><span>End-effector axes</span><span class="good">Robot-base axes (ours)</span></div>
+        <video controls muted playsinline loop preload="metadata" poster="static/images/coordinate-axes.jpg" width="1536" height="512" aria-label="Synchronized RGB and pointmaps comparing end-effector and robot-base axis orientations">
+          <source src="static/videos/coordinate-axes.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap" role="region" aria-label="Coordinate-frame ablation" tabindex="0">
+    <table class="mini">
+      <caption class="caption-note" style="padding-bottom: 10px;">Success rate (%) on 24 RoboCasa tasks. Mean &plusmn; standard deviation.</caption>
+      <thead><tr><th scope="col">Origin</th><th scope="col">Axis orientation</th><th scope="col">Success rate</th></tr></thead>
+      <tbody>
+        <tr><td>Robot base</td><td>Robot base</td><td>34.4 &plusmn; 1.3</td></tr>
+        <tr><td>Robot base</td><td>End effector</td><td>33.4 &plusmn; 1.4</td></tr>
+        <tr><td>End effector</td><td>End effector</td><td>34.9 &plusmn; 1.1</td></tr>
+        <tr class="ours"><td>End effector</td><td>Robot base (ours)</td><td>36.8 &plusmn; 0.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="container" id="results">
+  <h2 class="sec-label">Results</h2>
+  <div class="sec-claim">Better Manipulation in Simulation and on a Real Robot</div>
+  <p class="body-text">
+    We evaluate on <b>24 RoboCasa tasks and four real-world tasks</b> using pretrained &pi;<sub>0.5</sub>.
+    SeeR-VLA improves average success over RGB-only policies by <b>6.4 percentage points in simulation</b>
+    and <b>32.5 points on the real robot</b>.
+  </p>
+  <div class="row2" style="max-width: 800px; margin: 26px auto; align-items: stretch;">
+    <div class="stat-line"><div class="stat-num good">55.1 &rarr; 61.5%</div><div class="stat-desc"><b>RoboCasa</b><br> RGB-only &pi;<sub>0.5</sub> &rarr; SeeR-VLA<br>+6.4 points over RGB and +3.5 over PointVLA.</div></div>
+    <div class="stat-line"><div class="stat-num good">37.5 &rarr; 70.0%</div><div class="stat-desc"><b>Real robot</b><br> RGB-only &pi;<sub>0.5</sub> &rarr; SeeR-VLA<br>+32.5 points over RGB and +23.7 over PointVLA.</div></div>
+  </div>
+  <figure>
+    <a class="figure-link" href="static/images/experiment_setup.png" target="_blank" rel="noopener" aria-label="Open the simulation and real-world experiment setup at full resolution">
+      <img src="static/images/experiment_setup.png" alt="RoboCasa tasks and camera placements alongside real-robot pick-and-place, stacking, drawer opening, peg-in-hole, and eight training camera viewpoints." loading="lazy" width="2200" height="644">
+    </a>
+    <figcaption><b>Learning from varied camera placements.</b> RoboCasa external-camera poses vary across training demonstrations and use fixed reference viewpoints at evaluation. Real-world data includes 320 demonstrations from eight external-camera viewpoints. Evaluation uses one of those training viewpoints.</figcaption>
+  </figure>
+
+  <div class="table-wrap" id="real-robot" role="region" aria-label="Simulation and real-world results" tabindex="0">
+    <table class="results combined-results">
+      <caption>Success rate (%). RoboCasa covers 24 tasks with mean &plusmn; s.d. over 3 seeds. Real-robot evaluation uses 20 trials per task.</caption>
+      <thead>
+        <tr><th scope="col" rowspan="2">Method</th><th scope="col" rowspan="2">RoboCasa<br>Average</th><th scope="colgroup" colspan="5">Real robot</th></tr>
+        <tr><th scope="col">Pick &amp; place</th><th scope="col">Stack</th><th scope="col">Open drawer</th><th scope="col">Peg in hole</th><th scope="col">Average</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>FP3</td><td>42.9 &plusmn; 0.7</td><td>25.0</td><td>15.0</td><td>80.0</td><td>55.0</td><td>43.8</td></tr>
+        <tr><td>&pi;<sub>0.5</sub></td><td>55.1 &plusmn; 0.3</td><td>50.0</td><td>15.0</td><td>65.0</td><td>20.0</td><td>37.5</td></tr>
+        <tr><td>+ KYC</td><td>55.8 &plusmn; 3.9</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>+ OC-VLA</td><td>57.4 &plusmn; 1.1</td><td>60.0</td><td>25.0</td><td>75.0</td><td>20.0</td><td>45.0</td></tr>
+        <tr><td>+ GeoVLA</td><td>57.4 &plusmn; 1.4</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>+ PointVLA</td><td>58.0 &plusmn; 0.7</td><td>45.0</td><td>30.0</td><td>75.0</td><td>35.0</td><td>46.3</td></tr>
+        <tr class="ours"><td>+ SeeR-VLA (ours)</td><td>61.5 &plusmn; 1.2</td><td>75.0</td><td>55.0</td><td>85.0</td><td>65.0</td><td>70.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="caption-note">VLA baselines are reimplemented on &pi;<sub>0.5</sub>. FP3 uses its DROID-pretrained checkpoint.</p>
+</section>
+
+<section class="container" id="ablation">
+  <h2 class="sec-label">Ablation Studies</h2>
+  <div class="sec-claim">Which Representation and Fusion Work Best?</div>
+  <p class="body-text">Controlled comparisons examine how to represent 3D geometry and how to combine it with RGB. These studies use pretrained VLM weights without robot-action pretraining. The coordinate frame is fixed to the robot base.</p>
+  <div class="takeaways">
+    <details class="takeaway">
+      <summary><span class="tk-num">1</span>Provide Explicit 3D Coordinates<span class="chev" aria-hidden="true">&#9660;</span></summary>
+      <div class="tk-body">
+        <p>Depth and Pl&uuml;cker rays together provide the information needed to recover robot-frame geometry. Constructing pointmaps explicitly improves success from <b>31.7% to 34.4%</b>.</p>
+        <div class="table-wrap" role="region" aria-label="Geometric representation ablation" tabindex="0">
+          <table class="mini">
+            <thead><tr><th scope="col">Geometric input</th><th scope="col">Fusion</th><th scope="col">Success rate (%)</th></tr></thead>
+            <tbody>
+              <tr><td>RGB only</td><td>&mdash;</td><td>25.6 &plusmn; 1.3</td></tr>
+              <tr><td>Depth</td><td>Addition</td><td>29.6 &plusmn; 1.1</td></tr>
+              <tr><td>Pl&uuml;cker rays</td><td>Addition</td><td>29.3 &plusmn; 0.9</td></tr>
+              <tr><td>Depth + Pl&uuml;cker rays</td><td>Addition</td><td>31.7 &plusmn; 0.3</td></tr>
+              <tr><td>Point cloud</td><td>Addition</td><td>31.4 &plusmn; 1.5</td></tr>
+              <tr class="ours"><td>Pointmap</td><td>Addition</td><td>34.4 &plusmn; 1.3</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The point-cloud variant uses a pretrained point-cloud encoder and aligns its features to RGB patches. Its lower score supports the pointmap design.</p>
+      </div>
+    </details>
+    <details class="takeaway">
+      <summary><span class="tk-num">2</span>Add Features at Corresponding Image Locations<span class="chev" aria-hidden="true">&#9660;</span></summary>
+      <div class="tk-body">
+        <p>Separate encoders preserve each modality's representation. <b>Adding their spatially aligned features</b> performs best and keeps the number of visual tokens unchanged.</p>
+        <div class="table-wrap" role="region" aria-label="Feature-fusion ablation" tabindex="0">
+          <table class="mini">
+            <thead><tr><th scope="col">Pointmap and RGB fusion</th><th scope="col">Success rate (%)</th></tr></thead>
+            <tbody>
+              <tr><td>Token concatenation</td><td>30.3 &plusmn; 0.6</td></tr>
+              <tr><td>Channel concatenation</td><td>31.6 &plusmn; 1.4</td></tr>
+              <tr class="ours"><td>Element-wise addition</td><td>34.4 &plusmn; 1.3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="container" id="analysis">
+  <h2 class="sec-label">Analysis</h2>
+  <div class="takeaways">
+    <details class="takeaway" id="viewpoints">
+      <summary><span class="tk-num">1</span>Viewpoint Diversity<span class="chev" aria-hidden="true">&#9660;</span></summary>
+      <div class="tk-body">
+  <p class="body-text">The advantage over RGB-only policies grows as training camera placements become more varied. The pointmaps express geometry in a common robot reference even as its appearance changes across viewpoints.</p>
+  <div class="evidence-row">
+    <figure style="margin: 0;">
+      <a class="figure-link" href="static/images/viewpoint_variation.png" target="_blank" rel="noopener" aria-label="Open the training-viewpoint variation results at full resolution">
+        <img src="static/images/viewpoint_variation.png" alt="The SeeR-VLA advantage grows from 5.4 to 10.2 to 12.3 percentage points as training-camera translation and rotation variation increase." loading="lazy" width="2200" height="1069">
+      </a>
+    </figure>
+    <div>
+      <div class="stat-line"><div class="stat-num good">+5.4 &rarr; +12.3 points</div><div class="stat-desc">The advantage over RGB-only grows with training-time camera variation.</div></div>
+    </div>
+  </div>
+
+      </div>
+    </details>
+    <details class="takeaway" id="policy-geometry">
+      <summary><span class="tk-num">2</span>What the Policy Uses<span class="chev" aria-hidden="true">&#9660;</span></summary>
+      <div class="tk-body">
+        <div class="analysis-panel">
+          <figure>
+            <a class="figure-link" href="static/images/geometry_sensitivity.png" target="_blank" rel="noopener" aria-label="Open panel a showing pixel-to-action sensitivity">
+              <img src="static/images/geometry_sensitivity.png" alt="RGB and pointmap input gradients for Sink to Counter and Counter to Cabinet. Pointmap sensitivity is concentrated near the target object." loading="lazy" width="1361" height="1294">
+            </a>
+          </figure>
+          <div class="analysis-explanation">
+            <h3>(a) Where Do Inputs Affect the Action?</h3>
+            <p>Brighter regions indicate where small input changes have a larger effect on predicted motion.</p>
+            <p>Pointmap sensitivity concentrates around the target object. RGB sensitivity is more broadly distributed.</p>
+            <p><b>The policy is sensitive to task-relevant 3D geometry.</b></p>
+          </div>
+        </div>
+        <div class="analysis-panel">
+          <figure>
+            <a class="figure-link" href="static/images/geometry_masking.png" target="_blank" rel="noopener" aria-label="Open panel b showing pointmap masking results">
+              <img src="static/images/geometry_masking.png" alt="Success drops most when pointmap coordinates on the robot and target object are masked. Random and shifted masks have smaller effects." loading="lazy" width="1361" height="906">
+            </a>
+          </figure>
+          <div class="analysis-explanation">
+            <h3>(b) What Happens When Geometry Is Removed?</h3>
+            <p>We mask the robot and target object in the pointmap while keeping RGB unchanged.</p>
+            <div class="stat-line"><div class="stat-num bad">52.9 &rarr; 42.1%</div><div class="stat-desc">Success on eight pick-and-place tasks.</div></div>
+            <p>Masking the same number of random or shifted pixels has much less impact.</p>
+            <p><b>The policy uses the robot and target object's geometry to act.</b></p>
+          </div>
+        </div>
+
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="container" id="bibtex">
+  <h2 class="sec-label">BibTeX</h2>
+  <div class="bibtex-box">
+    <button class="copy-btn" id="copy-bibtex" type="button" aria-label="Copy BibTeX citation" aria-live="polite">Copy</button>
+    <pre class="bibtex" id="bibtex-text">@article{lee2026seelikearobot,
+  title         = {See like a Robot: Robot-Centric Pointmaps for VLA Models},
+  author        = {Lee, Byungkun and Hwang, Dongyoon and Kim, Dongjin and
+                   Lee, Hojoon and Kim, Hyunseung and Choo, Jaegul and Park, Minho},
+  journal       = {arXiv preprint arXiv:2607.11498},
+  year          = {2026},
+  eprint        = {2607.11498},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url           = {https://arxiv.org/abs/2607.11498v2}
+}</pre>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container">Website template adapted from <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</div>
+</footer>
+<script>
+
+const frameTabs = [...document.querySelectorAll('.frame-tabs [role="tab"]')];
+function activateFrameTab(tab, focus = false) {
+  frameTabs.forEach(button => {
+    const selected = button === tab;
+    button.setAttribute('aria-selected', String(selected));
+    button.tabIndex = selected ? 0 : -1;
+    const panel = document.getElementById(button.getAttribute('aria-controls'));
+    panel.hidden = !selected;
+    if (!selected) panel.querySelectorAll('video').forEach(video => video.pause());
+  });
+  if (focus) tab.focus();
+}
+frameTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => activateFrameTab(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if (event.key === 'ArrowRight') next = (index + 1) % frameTabs.length;
+    if (event.key === 'ArrowLeft') next = (index + frameTabs.length - 1) % frameTabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = frameTabs.length - 1;
+    if (next !== undefined) { event.preventDefault(); activateFrameTab(frameTabs[next], true); }
+  });
+});
+const overviewVideo = document.getElementById('seer-overview');
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  overviewVideo.autoplay = false;
+  overviewVideo.pause();
+}
+document.getElementById('copy-bibtex').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  const citation = document.getElementById('bibtex-text');
+  try {
+    await navigator.clipboard.writeText(citation.textContent);
+    button.textContent = 'Copied!';
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(citation);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    button.textContent = 'Selected';
+  }
+  setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+});
+</script>
+</body>
 </html>
