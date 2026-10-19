@@ -325,6 +325,9 @@
     .analysis-explanation p { margin: 0 0 14px; }
     .analysis-explanation .stat-line { margin: 18px 0; }
     @media (max-width: 760px) { .analysis-panel { grid-template-columns: 1fr; gap: 20px; } .analysis-explanation { grid-row: 1; } }
+    #real-demos [hidden] { display: none !important; }
+    .demo-stage { margin-top: 24px; }
+    .demo-stage video { width: 100%; height: auto; display: block; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -382,7 +385,7 @@
     Keep the coordinate axes aligned with the robot base.
   </p>
   <nav class="section-links" aria-label="Page sections">
-    <a href="#motivation">Motivation</a><a href="#method">Method</a><a href="#coordinate-frame">Coordinate frame</a><a href="#results">Results</a><a href="#analysis">Analysis</a>
+    <a href="#motivation">Motivation</a><a href="#method">Method</a><a href="#coordinate-frame">Coordinate frame</a><a href="#results">Results</a><a href="#real-demos">Robot demos</a><a href="#analysis">Analysis</a>
   </nav>
 </section>
 
@@ -513,6 +516,45 @@
   <p class="caption-note">VLA baselines are reimplemented on &pi;<sub>0.5</sub>. FP3 uses its DROID-pretrained checkpoint.</p>
 </section>
 
+<section class="container" id="real-demos">
+  <h2 class="sec-label">Real-World Robot Demos</h2>
+  <p class="body-text">Five evaluation examples per task. All clips play at real time.</p>
+  <div class="task-tabs" role="tablist" aria-label="Real-world robot tasks">
+<button class="task-pill active" id="demo-tab-stack_blocks" type="button" role="tab" aria-selected="true" aria-controls="demo-panel-stack_blocks" tabindex="0">Stack blocks</button>
+<button class="task-pill" id="demo-tab-pick_and_place" type="button" role="tab" aria-selected="false" aria-controls="demo-panel-pick_and_place" tabindex="-1">Pick &amp; place</button>
+<button class="task-pill" id="demo-tab-open_drawer" type="button" role="tab" aria-selected="false" aria-controls="demo-panel-open_drawer" tabindex="-1">Open drawer</button>
+<button class="task-pill" id="demo-tab-peg_in_hole" type="button" role="tab" aria-selected="false" aria-controls="demo-panel-peg_in_hole" tabindex="-1">Peg in hole</button>
+</div>
+<div class="task-pane demo-pane" id="demo-panel-stack_blocks" role="tabpanel" aria-labelledby="demo-tab-stack_blocks">
+  <div class="demo-stage">
+    <video id="demo-video-stack_blocks" muted loop playsinline controls preload="none" poster="static/images/real-demos/stack_blocks-labeled.jpg" width="2060" height="1066" aria-label="Stack blocks comparing SeeR-VLA, pi zero point five, OC-VLA, PointVLA, and FP3 with model names and outcomes included in the video">
+      <source src="static/videos/real-demos/stack_blocks-labeled.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+<div class="task-pane demo-pane" id="demo-panel-pick_and_place" role="tabpanel" aria-labelledby="demo-tab-pick_and_place" hidden>
+  <div class="demo-stage">
+    <video id="demo-video-pick_and_place" muted loop playsinline controls preload="none" poster="static/images/real-demos/pick_and_place-labeled.jpg" width="2060" height="1066" aria-label="Pick &amp; place comparing SeeR-VLA, pi zero point five, OC-VLA, PointVLA, and FP3 with model names and outcomes included in the video">
+      <source src="static/videos/real-demos/pick_and_place-labeled.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+<div class="task-pane demo-pane" id="demo-panel-open_drawer" role="tabpanel" aria-labelledby="demo-tab-open_drawer" hidden>
+  <div class="demo-stage">
+    <video id="demo-video-open_drawer" muted loop playsinline controls preload="none" poster="static/images/real-demos/open_drawer-labeled.jpg" width="2060" height="1066" aria-label="Open drawer comparing SeeR-VLA, pi zero point five, OC-VLA, PointVLA, and FP3 with model names and outcomes included in the video">
+      <source src="static/videos/real-demos/open_drawer-labeled.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+<div class="task-pane demo-pane" id="demo-panel-peg_in_hole" role="tabpanel" aria-labelledby="demo-tab-peg_in_hole" hidden>
+  <div class="demo-stage">
+    <video id="demo-video-peg_in_hole" muted loop playsinline controls preload="none" poster="static/images/real-demos/peg_in_hole-labeled.jpg" width="2060" height="1066" aria-label="Peg in hole comparing SeeR-VLA, pi zero point five, OC-VLA, PointVLA, and FP3 with model names and outcomes included in the video">
+      <source src="static/videos/real-demos/peg_in_hole-labeled.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+</section>
+
 <section class="container" id="ablation">
   <h2 class="sec-label">Ablation Studies</h2>
   <div class="sec-claim">Which Representation and Fusion Work Best?</div>
@@ -635,6 +677,48 @@
   <div class="container">Website template adapted from <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</div>
 </footer>
 <script>
+
+const demoTabs = [...document.querySelectorAll('#real-demos [role="tab"]')];
+const reducedDemoMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function activateDemo(tab, focus = false) {
+  demoTabs.forEach(button => {
+    const active = button === tab;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', String(active));
+    button.tabIndex = active ? 0 : -1;
+    const panel = document.getElementById(button.getAttribute('aria-controls'));
+    panel.hidden = !active;
+    const video = panel.querySelector('video');
+    if (!active) video.pause();
+    else {
+      if (video.readyState) video.currentTime = 0;
+      if (!reducedDemoMotion.matches) video.play().catch(() => {});
+    }
+  });
+  if (focus) tab.focus();
+}
+demoTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => activateDemo(tab));
+  tab.addEventListener('keydown', event => {
+    let next;
+    if (event.key === 'ArrowRight') next = (index + 1) % demoTabs.length;
+    if (event.key === 'ArrowLeft') next = (index + demoTabs.length - 1) % demoTabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = demoTabs.length - 1;
+    if (next !== undefined) { event.preventDefault(); activateDemo(demoTabs[next], true); }
+  });
+});
+const demoObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const video = entry.target;
+    if (entry.isIntersecting && !video.closest('.demo-pane').hidden && !reducedDemoMotion.matches) video.play().catch(() => {});
+    else video.pause();
+  });
+}, {threshold: 0.2});
+document.querySelectorAll('.demo-stage video').forEach(video => {
+  demoObserver.observe(video);
+});
+
 
 const frameTabs = [...document.querySelectorAll('.frame-tabs [role="tab"]')];
 function activateFrameTab(tab, focus = false) {
